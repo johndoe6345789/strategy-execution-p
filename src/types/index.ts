@@ -46,3 +46,52 @@ export interface Portfolio {
   capacity: number
   utilized: number
 }
+
+export interface RoadmapProject {
+  id: string
+  name: string
+  description: string
+  owner: string
+  status: StatusType
+  priority: PriorityType
+  startDate: string
+  endDate: string
+  progress: number
+  objectives: RoadmapObjective[]
+  metrics: RoadmapMetric[]
+}
+
+export interface RoadmapObjective {
+  id: string
+  projectId: string
+  category: 'breakthrough' | 'annual' | 'improvement'
+  description: string
+  owner: string
+  targetDate: string
+  status: StatusType
+  metrics: RoadmapMetric[]
+}
+
+export interface RoadmapMetric {
+  id: string
+  name: string
+  baseline: number
+  current: number
+  target: number
+  unit: string
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual'
+  lastUpdated: string
+  trend: 'improving' | 'stable' | 'declining'
+}
+
+export interface BowlingChartData {
+  objective: string
+  months: MonthStatus[]
+}
+
+export interface MonthStatus {
+  month: string
+  status: 'green' | 'yellow' | 'red' | 'not-started'
+  actual: number
+  target: number
+}
