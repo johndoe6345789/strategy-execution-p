@@ -59,6 +59,34 @@ export interface RoadmapProject {
   progress: number
   objectives: RoadmapObjective[]
   metrics: RoadmapMetric[]
+  budget?: number
+  actualSpend?: number
+  dependencies?: string[]
+  countermeasures?: Countermeasure[]
+  capacity?: ProjectCapacity
+}
+
+export interface Countermeasure {
+  id: string
+  issue: string
+  action: string
+  owner: string
+  dueDate: string
+  status: 'open' | 'in-progress' | 'completed'
+  createdAt: string
+}
+
+export interface ProjectCapacity {
+  totalHours: number
+  allocatedHours: number
+  team: TeamMember[]
+}
+
+export interface TeamMember {
+  id: string
+  name: string
+  role: string
+  allocation: number
 }
 
 export interface RoadmapObjective {

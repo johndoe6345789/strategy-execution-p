@@ -25,11 +25,17 @@ import {
   FolderOpen,
   Trash,
   PencilSimple,
-  CalendarBlank
+  CalendarBlank,
+  CurrencyDollar,
+  Users,
+  Lightning,
+  ArrowsDownUp,
+  Link as LinkIcon,
+  WarningOctagon
 } from '@phosphor-icons/react'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
-import type { RoadmapProject, RoadmapObjective, RoadmapMetric, BowlingChartData, StatusType, PriorityType } from '@/types'
+import type { RoadmapProject, RoadmapObjective, RoadmapMetric, BowlingChartData, StatusType, PriorityType, Countermeasure } from '@/types'
 
 interface XMatrixItem {
   id: string
@@ -43,6 +49,7 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
   const [editingProject, setEditingProject] = useState<RoadmapProject | null>(null)
   const [isAddingObjective, setIsAddingObjective] = useState(false)
   const [isAddingMetric, setIsAddingMetric] = useState(false)
+  const [isAddingCountermeasure, setIsAddingCountermeasure] = useState(false)
   const [selectedProjectId, setSelectedProjectId] = useState<string>('')
   const [newProject, setNewProject] = useState<Partial<RoadmapProject>>({
     name: '',
@@ -54,7 +61,18 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
     endDate: '',
     progress: 0,
     objectives: [],
-    metrics: []
+    metrics: [],
+    budget: 0,
+    actualSpend: 0,
+    dependencies: [],
+    countermeasures: []
+  })
+  const [newCountermeasure, setNewCountermeasure] = useState<Partial<Countermeasure>>({
+    issue: '',
+    action: '',
+    owner: '',
+    dueDate: '',
+    status: 'open'
   })
   const [newObjective, setNewObjective] = useState<Partial<RoadmapObjective>>({
     category: 'annual',
@@ -91,7 +109,11 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
       endDate: newProject.endDate,
       progress: 0,
       objectives: [],
-      metrics: []
+      metrics: [],
+      budget: newProject.budget || 0,
+      actualSpend: 0,
+      dependencies: [],
+      countermeasures: []
     }
 
     setProjects((prev) => [...prev, project])
@@ -106,7 +128,11 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
       endDate: '',
       progress: 0,
       objectives: [],
-      metrics: []
+      metrics: [],
+      budget: 0,
+      actualSpend: 0,
+      dependencies: [],
+      countermeasures: []
     })
     toast.success('Project created successfully')
   }
@@ -186,6 +212,39 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
       trend: 'stable'
     })
     toast.success('Metric added to project')
+  }
+
+  const handleAddCountermeasure = () => {
+    if (!newCountermeasure.issue || !newCountermeasure.action || !newCountermeasure.owner || !newCountermeasure.dueDate) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    const countermeasure: Countermeasure = {
+      id: `cm-${Date.now()}`,
+      issue: newCountermeasure.issue,
+      action: newCountermeasure.action,
+      owner: newCountermeasure.owner,
+      dueDate: newCountermeasure.dueDate,
+      status: newCountermeasure.status as 'open' | 'in-progress' | 'completed',
+      createdAt: new Date().toISOString()
+    }
+
+    setProjects((prev) => prev.map(p => 
+      p.id === selectedProjectId 
+        ? { ...p, countermeasures: [...(p.countermeasures || []), countermeasure] }
+        : p
+    ))
+    
+    setIsAddingCountermeasure(false)
+    setNewCountermeasure({
+      issue: '',
+      action: '',
+      owner: '',
+      dueDate: '',
+      status: 'open'
+    })
+    toast.success('Countermeasure added to project')
   }
 
   const handleUpdateProjectProgress = (projectId: string) => {
@@ -324,6 +383,16 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
                   </SelectContent>
                 </Select>
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="budget">Budget ($)</Label>
+                <Input
+                  id="budget"
+                  type="number"
+                  value={newProject.budget}
+                  onChange={(e) => setNewProject({ ...newProject, budget: parseFloat(e.target.value) })}
+                  placeholder="0"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddingProject(false)}>Cancel</Button>
@@ -383,9 +452,27 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
                     <Progress value={project.progress} className="h-2" />
                   </div>
                   
+                  {project.budget && project.budget > 0 && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold flex items-center gap-2">
+                          <CurrencyDollar size={16} weight="bold" className="text-accent" />
+                          Budget Utilization
+                        </span>
+                        <span className="text-sm font-mono">
+                          ${(project.actualSpend || 0).toLocaleString()} / ${project.budget.toLocaleString()}
+                        </span>
+                      </div>
+                      <Progress 
+                        value={((project.actualSpend || 0) / project.budget) * 100} 
+                        className="h-2" 
+                      />
+                    </div>
+                  )}
+                  
                   <Separator />
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-muted-foreground">Objectives</span>
@@ -420,6 +507,24 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
                       >
                         <Plus size={16} weight="bold" />
                         Add Metric
+                      </Button>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Countermeasures</span>
+                        <span className="text-sm font-semibold">{project.countermeasures?.length || 0}</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full gap-2"
+                        onClick={() => {
+                          setSelectedProjectId(project.id)
+                          setIsAddingCountermeasure(true)
+                        }}
+                      >
+                        <Plus size={16} weight="bold" />
+                        Add Action
                       </Button>
                     </div>
                   </div>
@@ -465,6 +570,38 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
                             </div>
                           )
                         })}
+                      </div>
+                    </>
+                  )}
+
+                  {project.countermeasures && project.countermeasures.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                          <Lightning size={16} weight="bold" className="text-warning" />
+                          Active Countermeasures
+                        </h5>
+                        {project.countermeasures.map((cm) => (
+                          <div key={cm.id} className="p-3 border border-warning/30 rounded-lg bg-warning/5">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-foreground mb-1">{cm.issue}</p>
+                                <p className="text-xs text-muted-foreground mb-2">Action: {cm.action}</p>
+                              </div>
+                              <Badge variant="outline" className={`shrink-0 text-xs capitalize ${
+                                cm.status === 'completed' ? 'bg-success/10 text-success border-success/30' :
+                                cm.status === 'in-progress' ? 'bg-primary/10 text-primary border-primary/30' :
+                                'bg-muted text-muted-foreground'
+                              }`}>
+                                {cm.status.replace('-', ' ')}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Owner: {cm.owner} • Due: {new Date(cm.dueDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </>
                   )}
@@ -653,6 +790,77 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddingMetric(false)}>Cancel</Button>
             <Button onClick={handleAddMetric}>Add Metric</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAddingCountermeasure} onOpenChange={setIsAddingCountermeasure}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Countermeasure</DialogTitle>
+            <DialogDescription>Define an action to address an issue or risk (Hoshin Kanri PDCA)</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="cm-issue">Issue / Problem Statement *</Label>
+              <Textarea
+                id="cm-issue"
+                value={newCountermeasure.issue}
+                onChange={(e) => setNewCountermeasure({ ...newCountermeasure, issue: e.target.value })}
+                placeholder="Describe the problem or risk requiring countermeasures"
+                rows={2}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="cm-action">Countermeasure Action *</Label>
+              <Textarea
+                id="cm-action"
+                value={newCountermeasure.action}
+                onChange={(e) => setNewCountermeasure({ ...newCountermeasure, action: e.target.value })}
+                placeholder="Describe the specific action to resolve the issue"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="cm-owner">Owner *</Label>
+                <Input
+                  id="cm-owner"
+                  value={newCountermeasure.owner}
+                  onChange={(e) => setNewCountermeasure({ ...newCountermeasure, owner: e.target.value })}
+                  placeholder="Action owner"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="cm-dueDate">Due Date *</Label>
+                <Input
+                  id="cm-dueDate"
+                  type="date"
+                  value={newCountermeasure.dueDate}
+                  onChange={(e) => setNewCountermeasure({ ...newCountermeasure, dueDate: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="cm-status">Status</Label>
+                <Select 
+                  value={newCountermeasure.status} 
+                  onValueChange={(value) => setNewCountermeasure({ ...newCountermeasure, status: value as 'open' | 'in-progress' | 'completed' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddingCountermeasure(false)}>Cancel</Button>
+            <Button onClick={handleAddCountermeasure}>Add Countermeasure</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1449,8 +1657,157 @@ function TimelineView({ projects }: { projects: RoadmapProject[] }) {
   )
 }
 
-function DashboardView({ projects }: { projects: RoadmapProject[] }) {
+function CountermeasuresView({ projects, setProjects }: { projects: RoadmapProject[], setProjects: (updater: (prev: RoadmapProject[]) => RoadmapProject[]) => void }) {
+  const allCountermeasures = projects.flatMap(project =>
+    (project.countermeasures || []).map(cm => ({ ...cm, projectName: project.name, projectId: project.id }))
+  )
+
+  const handleUpdateStatus = (projectId: string, countermeasureId: string, newStatus: 'open' | 'in-progress' | 'completed') => {
+    setProjects((prev) => prev.map(p => {
+      if (p.id !== projectId) return p
+      return {
+        ...p,
+        countermeasures: (p.countermeasures || []).map(cm =>
+          cm.id === countermeasureId ? { ...cm, status: newStatus } : cm
+        )
+      }
+    }))
+    toast.success('Countermeasure status updated')
+  }
+
+  const handleDeleteCountermeasure = (projectId: string, countermeasureId: string) => {
+    setProjects((prev) => prev.map(p => {
+      if (p.id !== projectId) return p
+      return {
+        ...p,
+        countermeasures: (p.countermeasures || []).filter(cm => cm.id !== countermeasureId)
+      }
+    }))
+    toast.success('Countermeasure deleted')
+  }
+
+  const statusColors = {
+    'open': 'bg-muted text-muted-foreground',
+    'in-progress': 'bg-primary/10 text-primary border-primary/30',
+    'completed': 'bg-success/10 text-success border-success/30'
+  }
+
+  if (allCountermeasures.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <Lightning size={48} className="text-muted-foreground mb-4" />
+          <p className="text-muted-foreground text-center">No countermeasures defined. Add countermeasures to projects to track corrective actions.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const openCountermeasures = allCountermeasures.filter(cm => cm.status === 'open')
+  const inProgressCountermeasures = allCountermeasures.filter(cm => cm.status === 'in-progress')
+  const completedCountermeasures = allCountermeasures.filter(cm => cm.status === 'completed')
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Open</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-muted-foreground">{openCountermeasures.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>In Progress</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">{inProgressCountermeasures.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Completed</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-success">{completedCountermeasures.length}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Countermeasures (PDCA Actions)</CardTitle>
+          <CardDescription>Track corrective and preventive actions across all projects</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {allCountermeasures.map((cm) => {
+              const isOverdue = new Date(cm.dueDate) < new Date() && cm.status !== 'completed'
+              return (
+                <div key={cm.id} className={`p-4 border rounded-lg ${isOverdue ? 'border-destructive/50 bg-destructive/5' : 'border-border bg-card'}`}>
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Badge variant="outline" className={`${statusColors[cm.status]} capitalize font-semibold`}>
+                          {cm.status.replace('-', ' ')}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {cm.projectName}
+                        </Badge>
+                        {isOverdue && (
+                          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-xs">
+                            Overdue
+                          </Badge>
+                        )}
+                      </div>
+                      <h4 className="font-semibold mb-2">{cm.issue}</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        <strong>Action:</strong> {cm.action}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span><strong>Owner:</strong> {cm.owner}</span>
+                        <span><strong>Due:</strong> {new Date(cm.dueDate).toLocaleDateString()}</span>
+                        <span><strong>Created:</strong> {new Date(cm.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Select
+                        value={cm.status}
+                        onValueChange={(value) => handleUpdateStatus(cm.projectId, cm.id, value as 'open' | 'in-progress' | 'completed')}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="open">Open</SelectItem>
+                          <SelectItem value="in-progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteCountermeasure(cm.projectId, cm.id)}
+                      >
+                        <Trash size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function DashboardView({ projects }: { projects: RoadmapProject [] }) {
   const allObjectives = projects.flatMap(p => p.objectives)
+  const allCountermeasures = projects.flatMap(p => p.countermeasures || [])
   
   const overallHealth = {
     onTrack: allObjectives.filter(o => o.status === 'on-track').length,
@@ -1462,9 +1819,15 @@ function DashboardView({ projects }: { projects: RoadmapProject[] }) {
   const total = Object.values(overallHealth).reduce((a, b) => a + b, 0)
   const healthPercent = total > 0 ? Math.round((overallHealth.onTrack / total) * 100) : 0
 
+  const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0)
+  const totalSpend = projects.reduce((sum, p) => sum + (p.actualSpend || 0), 0)
+  const budgetUtilization = totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0
+
+  const openCountermeasures = allCountermeasures.filter(cm => cm.status === 'open' || cm.status === 'in-progress').length
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Overall Health</CardDescription>
@@ -1503,18 +1866,68 @@ function DashboardView({ projects }: { projects: RoadmapProject[] }) {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>Off Track</CardDescription>
+            <CardDescription>Budget Used</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-3">
-              <div className="text-3xl font-bold text-destructive">{overallHealth.offTrack}</div>
-              <XCircle size={32} className="text-destructive" weight="fill" />
+              <div className="text-3xl font-bold text-primary">{budgetUtilization}%</div>
+              <CurrencyDollar size={32} className="text-primary" weight="bold" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${totalSpend.toLocaleString()} / ${totalBudget.toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Active Actions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-bold text-warning">{openCountermeasures}</div>
+              <Lightning size={32} className="text-warning" weight="bold" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Financial Overview</CardTitle>
+            <CardDescription>Budget tracking across all strategic projects</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {projects.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No projects to display</p>
+            ) : (
+              projects.map((proj) => {
+                const budget = proj.budget || 0
+                const spend = proj.actualSpend || 0
+                const utilization = budget > 0 ? (spend / budget) * 100 : 0
+                const isOverBudget = utilization > 100
+
+                return (
+                  <div key={proj.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{proj.name}</span>
+                      <Badge variant="outline" className={`font-mono ${isOverBudget ? 'bg-destructive/10 text-destructive border-destructive/30' : ''}`}>
+                        {Math.round(utilization)}%
+                      </Badge>
+                    </div>
+                    <Progress value={Math.min(utilization, 100)} className="h-2" />
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Spent: ${spend.toLocaleString()}</span>
+                      <span>Budget: ${budget.toLocaleString()}</span>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Strategic Objectives Summary</CardTitle>
@@ -1524,27 +1937,31 @@ function DashboardView({ projects }: { projects: RoadmapProject[] }) {
             {allObjectives.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">No objectives to display</p>
             ) : (
-              allObjectives.map((obj) => {
-              const avgProgress = obj.metrics.reduce((sum, m) => {
-                const progress = ((m.current - m.baseline) / (m.target - m.baseline)) * 100
-                return sum + progress
-              }, 0) / obj.metrics.length
+              allObjectives.slice(0, 6).map((obj) => {
+              const avgProgress = obj.metrics.length > 0 
+                ? obj.metrics.reduce((sum, m) => {
+                  const progress = ((m.current - m.baseline) / (m.target - m.baseline)) * 100
+                  return sum + progress
+                }, 0) / obj.metrics.length
+                : 0
 
               return (
                 <div key={obj.id} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{obj.description}</span>
-                    <Badge variant="outline" className="font-mono">
+                    <span className="text-sm font-medium truncate flex-1">{obj.description}</span>
+                    <Badge variant="outline" className="font-mono shrink-0 ml-2">
                       {Math.round(avgProgress)}%
                     </Badge>
                   </div>
-                  <Progress value={avgProgress} className="h-2" />
+                  <Progress value={Math.max(0, Math.min(100, avgProgress))} className="h-2" />
                 </div>
               )
             }))}
           </CardContent>
         </Card>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Metrics by Category</CardTitle>
@@ -1572,10 +1989,39 @@ function DashboardView({ projects }: { projects: RoadmapProject[] }) {
                       </Badge>
                     </div>
                   </div>
-                  <Progress value={avgProgress} className="h-2" />
+                  <Progress value={Math.max(0, Math.min(100, avgProgress))} className="h-2" />
                 </div>
               )
             })}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Projects Overview</CardTitle>
+            <CardDescription>Status distribution across all projects</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{proj.name}</p>
+                  <p className="text-xs text-muted-foreground">{proj.owner}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className={`capitalize ${
+                    proj.status === 'on-track' ? 'bg-success/10 text-success border-success/30' :
+                    proj.status === 'at-risk' ? 'bg-warning/10 text-warning border-warning/30' :
+                    proj.status === 'blocked' ? 'bg-destructive/10 text-destructive border-destructive/30' :
+                    proj.status === 'completed' ? 'bg-primary/10 text-primary border-primary/30' :
+                    'bg-muted text-muted-foreground'
+                  }`}>
+                    {proj.status.replace('-', ' ')}
+                  </Badge>
+                  <span className="text-sm font-mono font-semibold">{proj.progress}%</span>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>
@@ -1636,6 +2082,20 @@ export default function Roadmap() {
         startDate: '2024-01-15',
         endDate: '2024-12-31',
         progress: 45,
+        budget: 2500000,
+        actualSpend: 980000,
+        dependencies: [],
+        countermeasures: [
+          {
+            id: 'cm-sample-1',
+            issue: 'Customer adoption rate below target for new digital channels',
+            action: 'Launch targeted training program and incentive campaign to drive usage',
+            owner: 'Marketing Team',
+            dueDate: '2024-04-30',
+            status: 'in-progress',
+            createdAt: new Date('2024-03-15').toISOString()
+          }
+        ],
         objectives: [
           {
             id: 'obj-sample-1',
@@ -1728,6 +2188,20 @@ export default function Roadmap() {
         startDate: '2024-02-01',
         endDate: '2024-11-30',
         progress: 62,
+        budget: 1200000,
+        actualSpend: 720000,
+        dependencies: [],
+        countermeasures: [
+          {
+            id: 'cm-sample-2',
+            issue: 'Equipment downtime exceeding targets in production line 3',
+            action: 'Implement predictive maintenance system and increase preventive maintenance frequency',
+            owner: 'James Wilson',
+            dueDate: '2024-05-15',
+            status: 'open',
+            createdAt: new Date('2024-04-01').toISOString()
+          }
+        ],
         objectives: [
           {
             id: 'obj-sample-3',
@@ -1810,34 +2284,38 @@ export default function Roadmap() {
       )}
 
       <Tabs defaultValue="projects" className="w-full">
-        <TabsList className="grid w-full grid-cols-7 h-14 bg-muted/50">
-          <TabsTrigger value="projects" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 h-auto lg:h-14 bg-muted/50">
+          <TabsTrigger value="projects" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <FolderOpen size={20} weight="bold" />
-            Projects
+            <span className="hidden lg:inline">Projects</span>
           </TabsTrigger>
-          <TabsTrigger value="dashboard" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="dashboard" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Gauge size={20} weight="bold" />
-            Dashboard
+            <span className="hidden lg:inline">Dashboard</span>
           </TabsTrigger>
-          <TabsTrigger value="timeline" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="timeline" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <CalendarBlank size={20} weight="bold" />
-            Timeline
+            <span className="hidden lg:inline">Timeline</span>
           </TabsTrigger>
-          <TabsTrigger value="objectives" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="objectives" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Target size={20} weight="bold" />
-            Objectives
+            <span className="hidden lg:inline">Objectives</span>
           </TabsTrigger>
-          <TabsTrigger value="metrics" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="metrics" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <ChartBar size={20} weight="bold" />
-            Metrics
+            <span className="hidden lg:inline">Metrics</span>
           </TabsTrigger>
-          <TabsTrigger value="bowling" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="bowling" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <ListChecks size={20} weight="bold" />
-            Bowling Chart
+            <span className="hidden lg:inline">Bowling</span>
           </TabsTrigger>
-          <TabsTrigger value="xmatrix" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="xmatrix" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <GridFour size={20} weight="bold" />
-            X-Matrix
+            <span className="hidden lg:inline">X-Matrix</span>
+          </TabsTrigger>
+          <TabsTrigger value="countermeasures" className="gap-2 text-sm lg:text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Lightning size={20} weight="bold" />
+            <span className="hidden lg:inline">Actions</span>
           </TabsTrigger>
         </TabsList>
 
@@ -1867,6 +2345,10 @@ export default function Roadmap() {
 
         <TabsContent value="xmatrix" className="mt-6">
           <XMatrixView projects={projects || []} />
+        </TabsContent>
+
+        <TabsContent value="countermeasures" className="mt-6">
+          <CountermeasuresView projects={projects || []} setProjects={setProjects} />
         </TabsContent>
       </Tabs>
     </div>
