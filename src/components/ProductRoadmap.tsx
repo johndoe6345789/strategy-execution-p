@@ -1,0 +1,531 @@
+import { useKV } from '@github/spark/hooks'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CheckCircle, Circle, Target, ChartBar, Users, Database, Rocket, Shield } from '@phosphor-icons/react'
+import { useState, useEffect } from 'react'
+
+interface RoadmapFeature {
+  id: string
+  name: string
+  description: string
+  category: 'strategy-cards' | 'workbench' | 'cross-product' | 'portfolio' | 'integration' | 'opex' | 'reporting' | 'non-functional'
+  priority: 'critical' | 'high' | 'medium' | 'low'
+  completed: boolean
+}
+
+const initialFeatures: RoadmapFeature[] = [
+  {
+    id: 'sc-1',
+    name: 'Strategy Framework Templates',
+    description: 'Support for proven frameworks (SWOT, Porter\'s 5 Forces, Blue Ocean, etc.)',
+    category: 'strategy-cards',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'sc-2',
+    name: 'Strategy Exploration & Comparison',
+    description: 'Enable comparison and refinement of multiple strategic options',
+    category: 'strategy-cards',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'sc-3',
+    name: 'Collaborative Workshops',
+    description: 'Real-time collaboration features for strategy workshops',
+    category: 'strategy-cards',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'sc-4',
+    name: 'Rationale & Decision Capture',
+    description: 'Capture assumptions, rationale, and strategic decisions',
+    category: 'strategy-cards',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'sc-5',
+    name: 'Guided Strategy Creation',
+    description: 'Step-by-step wizard for strategy formulation',
+    category: 'strategy-cards',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'wb-1',
+    name: 'Strategy-to-Execution Translation',
+    description: 'Convert strategic objectives into initiatives and projects',
+    category: 'workbench',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'wb-2',
+    name: 'Hoshin Kanri Support',
+    description: 'Full Hoshin Kanri methodology implementation',
+    category: 'workbench',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'wb-3',
+    name: 'X-Matrix',
+    description: 'Interactive X-Matrix for breakthrough objectives and annual goals',
+    category: 'workbench',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'wb-4',
+    name: 'OKR Management',
+    description: 'Objectives and Key Results tracking and alignment',
+    category: 'workbench',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'wb-5',
+    name: 'KPI & Metrics Dashboard',
+    description: 'Real-time KPI tracking with visual scorecards',
+    category: 'workbench',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'wb-6',
+    name: 'Bowling Chart',
+    description: 'Monthly progress tracking with red/yellow/green status',
+    category: 'workbench',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'wb-7',
+    name: 'Ownership & Accountability',
+    description: 'Clear owner assignment and responsibility tracking',
+    category: 'workbench',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'wb-8',
+    name: 'Initiative Progress Tracking',
+    description: 'Real-time tracking of initiative status and progress',
+    category: 'workbench',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'cp-1',
+    name: 'Single Source of Truth',
+    description: 'Centralized repository for all strategy and execution data',
+    category: 'cross-product',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'cp-2',
+    name: 'End-to-End Traceability',
+    description: 'Link strategic goals to initiatives to KPIs to individual objectives',
+    category: 'cross-product',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'cp-3',
+    name: 'Strategy Cards ↔ Workbench Integration',
+    description: 'Seamless data flow between strategy creation and execution',
+    category: 'cross-product',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'pf-1',
+    name: 'Strategic Portfolio Creation',
+    description: 'Group initiatives into portfolios (M&A, OpEx, ESG, etc.)',
+    category: 'portfolio',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'pf-2',
+    name: 'Portfolio Alignment Analysis',
+    description: 'Assess strategic alignment and impact across portfolios',
+    category: 'portfolio',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'pf-3',
+    name: 'Capacity & Demand Balancing',
+    description: 'Resource capacity planning and allocation',
+    category: 'portfolio',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'pf-4',
+    name: 'Dependency Management',
+    description: 'Track and visualize cross-initiative dependencies',
+    category: 'portfolio',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'pf-5',
+    name: 'Portfolio Governance',
+    description: 'Decision-making framework for prioritization and funding',
+    category: 'portfolio',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'int-1',
+    name: 'Project Management Tool Integration',
+    description: 'Connect with Jira, Asana, Monday.com, etc.',
+    category: 'integration',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'int-2',
+    name: 'ERP System Integration',
+    description: 'Financial and operational data sync with ERP systems',
+    category: 'integration',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'int-3',
+    name: 'CRM Integration',
+    description: 'Customer and revenue data integration',
+    category: 'integration',
+    priority: 'low',
+    completed: false
+  },
+  {
+    id: 'int-4',
+    name: 'API & Webhooks',
+    description: 'Extensible API for custom integrations',
+    category: 'integration',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'ox-1',
+    name: 'Lean Process Support',
+    description: 'Lean methodology tools and templates',
+    category: 'opex',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'ox-2',
+    name: 'Countermeasure Management',
+    description: 'Track improvement actions, not just KPI reporting',
+    category: 'opex',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'ox-3',
+    name: 'PDCA Cycle Tracking',
+    description: 'Plan-Do-Check-Act continuous improvement cycles',
+    category: 'opex',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'ox-4',
+    name: 'Multi-Region Reporting',
+    description: 'Consistent reporting across global units',
+    category: 'opex',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'rp-1',
+    name: 'Executive Dashboard',
+    description: 'Portfolio-level dashboards for leadership',
+    category: 'reporting',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'rp-2',
+    name: 'Drill-Down Reporting',
+    description: 'Navigate from enterprise level to project details',
+    category: 'reporting',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'rp-3',
+    name: 'Financial Outcome Tracking',
+    description: 'Link initiatives to financial results and savings',
+    category: 'reporting',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'rp-4',
+    name: 'Custom Scorecards',
+    description: 'Configurable scorecards with standard definitions',
+    category: 'reporting',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'rp-5',
+    name: 'Automated Report Generation',
+    description: 'Replace manual spreadsheet reporting',
+    category: 'reporting',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'nf-1',
+    name: 'Intuitive UX Design',
+    description: 'Minimal training required, clear visual models',
+    category: 'non-functional',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'nf-2',
+    name: 'Global Scalability',
+    description: 'Support for global organizations with large datasets',
+    category: 'non-functional',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'nf-3',
+    name: 'High Availability',
+    description: 'Enterprise-grade uptime and reliability',
+    category: 'non-functional',
+    priority: 'critical',
+    completed: false
+  },
+  {
+    id: 'nf-4',
+    name: 'Multi-Language Support',
+    description: 'Support for multiple regions and languages',
+    category: 'non-functional',
+    priority: 'medium',
+    completed: false
+  },
+  {
+    id: 'nf-5',
+    name: 'Role-Based Access Control',
+    description: 'Security and permissions management',
+    category: 'non-functional',
+    priority: 'high',
+    completed: false
+  },
+  {
+    id: 'nf-6',
+    name: 'Audit Trail',
+    description: 'Complete change history and data integrity',
+    category: 'non-functional',
+    priority: 'medium',
+    completed: false
+  }
+]
+
+const categoryConfig = {
+  'strategy-cards': { label: 'Strategy Cards', icon: Target, color: 'bg-blue-500' },
+  'workbench': { label: 'Workbench', icon: ChartBar, color: 'bg-purple-500' },
+  'cross-product': { label: 'Cross-Product', icon: Rocket, color: 'bg-accent' },
+  'portfolio': { label: 'Portfolio Management', icon: Database, color: 'bg-green-500' },
+  'integration': { label: 'Integration & APIs', icon: Database, color: 'bg-orange-500' },
+  'opex': { label: 'Operational Excellence', icon: Target, color: 'bg-teal-500' },
+  'reporting': { label: 'Reporting & Visibility', icon: ChartBar, color: 'bg-pink-500' },
+  'non-functional': { label: 'Platform & Infrastructure', icon: Shield, color: 'bg-gray-500' }
+}
+
+const priorityColors = {
+  critical: 'destructive',
+  high: 'default',
+  medium: 'secondary',
+  low: 'outline'
+} as const
+
+export default function ProductRoadmap() {
+  const [features, setFeatures] = useKV<RoadmapFeature[]>('product-roadmap-features', initialFeatures)
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+
+  const toggleFeature = (featureId: string) => {
+    setFeatures((current) => 
+      (current || []).map(f => 
+        f.id === featureId ? { ...f, completed: !f.completed } : f
+      )
+    )
+  }
+
+  const categorizedFeatures = selectedCategory === 'all' 
+    ? Object.keys(categoryConfig).map(cat => ({
+        category: cat as keyof typeof categoryConfig,
+        features: (features || []).filter(f => f.category === cat)
+      }))
+    : [{
+        category: selectedCategory as keyof typeof categoryConfig,
+        features: (features || []).filter(f => f.category === selectedCategory)
+      }]
+
+  const totalFeatures = (features || []).length
+  const completedFeatures = (features || []).filter(f => f.completed).length
+  const completionPercentage = Math.round((completedFeatures / totalFeatures) * 100)
+
+  const categoryProgress = Object.keys(categoryConfig).map(cat => {
+    const categoryFeatures = (features || []).filter(f => f.category === cat)
+    const completed = categoryFeatures.filter(f => f.completed).length
+    const total = categoryFeatures.length
+    return {
+      category: cat as keyof typeof categoryConfig,
+      completed,
+      total,
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+    }
+  })
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">StrategyOS Product Roadmap</h2>
+          <p className="text-muted-foreground mt-2">
+            Track development progress of core features and capabilities
+          </p>
+        </div>
+        <Card className="w-64">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{completedFeatures} of {totalFeatures}</span>
+                <span className="font-bold text-accent">{completionPercentage}%</span>
+              </div>
+              <Progress value={completionPercentage} className="h-2" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4">
+        {categoryProgress.map(({ category, completed, total, percentage }) => {
+          const config = categoryConfig[category]
+          const Icon = config.icon
+          return (
+            <Card key={category} className="cursor-pointer hover:border-accent transition-colors" onClick={() => setSelectedCategory(category)}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <div className={`${config.color} p-2 rounded-md`}>
+                    <Icon size={16} weight="bold" className="text-white" />
+                  </div>
+                  <CardTitle className="text-sm font-semibold">{config.label}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">{completed}/{total}</span>
+                    <span className="font-semibold">{percentage}%</span>
+                  </div>
+                  <Progress value={percentage} className="h-1.5" />
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+        <TabsList className="grid w-full grid-cols-9 h-auto">
+          <TabsTrigger value="all" className="text-xs">All Features</TabsTrigger>
+          {Object.entries(categoryConfig).map(([key, config]) => (
+            <TabsTrigger key={key} value={key} className="text-xs whitespace-nowrap">
+              {config.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value={selectedCategory} className="mt-6">
+          <div className="space-y-6">
+            {categorizedFeatures.map(({ category, features: categoryFeatures }) => {
+              const config = categoryConfig[category]
+              const Icon = config.icon
+              
+              return (
+                <div key={category}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`${config.color} p-2 rounded-md`}>
+                      <Icon size={20} weight="bold" className="text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold">{config.label}</h3>
+                    <Badge variant="secondary" className="ml-auto">
+                      {categoryFeatures.filter(f => f.completed).length} / {categoryFeatures.length}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {categoryFeatures.map((feature) => (
+                      <Card 
+                        key={feature.id} 
+                        className={`transition-all hover:shadow-md ${feature.completed ? 'bg-muted/30' : ''}`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4">
+                            <Checkbox
+                              id={feature.id}
+                              checked={feature.completed}
+                              onCheckedChange={() => toggleFeature(feature.id)}
+                              className="mt-1"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-4">
+                                <label
+                                  htmlFor={feature.id}
+                                  className={`text-sm font-semibold cursor-pointer ${
+                                    feature.completed ? 'line-through text-muted-foreground' : ''
+                                  }`}
+                                >
+                                  {feature.name}
+                                </label>
+                                <Badge variant={priorityColors[feature.priority]}>
+                                  {feature.priority}
+                                </Badge>
+                              </div>
+                              <p className={`text-sm mt-1 ${
+                                feature.completed ? 'text-muted-foreground line-through' : 'text-muted-foreground'
+                              }`}>
+                                {feature.description}
+                              </p>
+                            </div>
+                            {feature.completed ? (
+                              <CheckCircle size={20} weight="fill" className="text-green-500 mt-1 flex-shrink-0" />
+                            ) : (
+                              <Circle size={20} className="text-muted-foreground mt-1 flex-shrink-0" />
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}

@@ -1,12 +1,13 @@
 import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Strategy, ChartBar, FolderOpen, Target, MapTrifold } from '@phosphor-icons/react'
+import { Strategy, ChartBar, FolderOpen, Target, MapTrifold, Rocket } from '@phosphor-icons/react'
 import StrategyCards from './components/StrategyCards'
 import Workbench from './components/Workbench'
 import Portfolios from './components/Portfolios'
 import Dashboard from './components/Dashboard'
 import Roadmap from './components/Roadmap'
+import ProductRoadmap from './components/ProductRoadmap'
 import type { StrategyCard, Initiative } from './types'
 
 function App() {
@@ -43,7 +44,7 @@ function App() {
 
       <main className="container mx-auto px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-8 h-14 bg-muted/50">
+          <TabsList className="grid w-full grid-cols-6 mb-8 h-14 bg-muted/50">
             <TabsTrigger value="strategy" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Strategy size={20} weight="bold" />
               Strategy Cards
@@ -63,6 +64,10 @@ function App() {
             <TabsTrigger value="roadmap" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <MapTrifold size={20} weight="bold" />
               Roadmap
+            </TabsTrigger>
+            <TabsTrigger value="product-roadmap" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Rocket size={20} weight="bold" />
+              Product Roadmap
             </TabsTrigger>
           </TabsList>
 
@@ -84,6 +89,10 @@ function App() {
 
           <TabsContent value="roadmap" className="mt-0">
             <Roadmap />
+          </TabsContent>
+
+          <TabsContent value="product-roadmap" className="mt-0">
+            <ProductRoadmap />
           </TabsContent>
         </Tabs>
       </main>
