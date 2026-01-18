@@ -33,7 +33,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Support for proven frameworks (SWOT, Porter\'s 5 Forces, Blue Ocean, etc.)',
     category: 'strategy-cards',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive framework wizard with SWOT, Porter\'s Five Forces, and Blue Ocean Strategy templates with guided step-by-step creation process.'
   },
   {
     id: 'sc-2',
@@ -105,7 +107,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Real-time KPI tracking with visual scorecards',
     category: 'workbench',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive KPI dashboard with real-time tracking, trend analysis, category organization, and drill-down capability. Supports financial, operational, customer, and strategic metrics.'
   },
   {
     id: 'wb-6',
@@ -121,7 +125,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Clear owner assignment and responsibility tracking',
     category: 'workbench',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented owner assignment with avatar display, progress update attribution, and accountability tracking through the Initiative Tracker.'
   },
   {
     id: 'wb-8',
@@ -129,7 +135,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Real-time tracking of initiative status and progress',
     category: 'workbench',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Created comprehensive initiative tracker with status monitoring, progress updates, timeline tracking, budget visibility, and complete update history with notes.'
   },
   {
     id: 'cp-1',

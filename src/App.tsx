@@ -1,13 +1,15 @@
 import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Strategy, ChartBar, FolderOpen, Target, MapTrifold, Rocket } from '@phosphor-icons/react'
+import { Strategy, ChartBar, FolderOpen, Target, MapTrifold, Rocket, ChartLine, TrendUp } from '@phosphor-icons/react'
 import StrategyCards from './components/StrategyCards'
 import Workbench from './components/Workbench'
 import Portfolios from './components/Portfolios'
 import Dashboard from './components/Dashboard'
 import Roadmap from './components/Roadmap'
 import ProductRoadmap from './components/ProductRoadmap'
+import KPIDashboard from './components/KPIDashboard'
+import InitiativeTracker from './components/InitiativeTracker'
 import type { StrategyCard, Initiative } from './types'
 
 function App() {
@@ -44,30 +46,38 @@ function App() {
 
       <main className="container mx-auto px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-8 h-14 bg-muted/50">
-            <TabsTrigger value="strategy" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Strategy size={20} weight="bold" />
-              Strategy Cards
+          <TabsList className="grid w-full grid-cols-8 mb-8 h-14 bg-muted/50">
+            <TabsTrigger value="strategy" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Strategy size={18} weight="bold" />
+              Strategy
             </TabsTrigger>
-            <TabsTrigger value="workbench" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ChartBar size={20} weight="bold" />
+            <TabsTrigger value="workbench" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ChartBar size={18} weight="bold" />
               Workbench
             </TabsTrigger>
-            <TabsTrigger value="portfolios" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <FolderOpen size={20} weight="bold" />
+            <TabsTrigger value="tracker" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TrendUp size={18} weight="bold" />
+              Tracker
+            </TabsTrigger>
+            <TabsTrigger value="kpi" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ChartLine size={18} weight="bold" />
+              KPIs
+            </TabsTrigger>
+            <TabsTrigger value="portfolios" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FolderOpen size={18} weight="bold" />
               Portfolios
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Target size={20} weight="bold" />
+            <TabsTrigger value="dashboard" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Target size={18} weight="bold" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="roadmap" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <MapTrifold size={20} weight="bold" />
+            <TabsTrigger value="roadmap" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <MapTrifold size={18} weight="bold" />
               Roadmap
             </TabsTrigger>
-            <TabsTrigger value="product-roadmap" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Rocket size={20} weight="bold" />
-              Product Roadmap
+            <TabsTrigger value="product-roadmap" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Rocket size={18} weight="bold" />
+              Product
             </TabsTrigger>
           </TabsList>
 
@@ -77,6 +87,14 @@ function App() {
 
           <TabsContent value="workbench" className="mt-0">
             <Workbench />
+          </TabsContent>
+
+          <TabsContent value="tracker" className="mt-0">
+            <InitiativeTracker />
+          </TabsContent>
+
+          <TabsContent value="kpi" className="mt-0">
+            <KPIDashboard />
           </TabsContent>
 
           <TabsContent value="portfolios" className="mt-0">
