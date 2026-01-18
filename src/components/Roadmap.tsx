@@ -2073,152 +2073,101 @@ export default function Roadmap() {
   if (!projects || projects.length === 0) {
     const sampleProjects: RoadmapProject[] = [
       {
-        id: 'proj-sample-1',
-        name: 'Digital Transformation Initiative',
-        description: 'Modernize core business processes and customer touchpoints through digital-first approach',
-        owner: 'Sarah Chen',
+        id: 'proj-strategyos-1',
+        name: 'Strategy Cards - MVP Launch',
+        description: 'Build core strategy creation and alignment product with proven frameworks',
+        owner: 'Product Team',
         status: 'on-track',
         priority: 'critical',
-        startDate: '2024-01-15',
-        endDate: '2024-12-31',
-        progress: 45,
-        budget: 2500000,
-        actualSpend: 980000,
+        startDate: '2024-01-01',
+        endDate: '2024-06-30',
+        progress: 65,
+        budget: 850000,
+        actualSpend: 520000,
         dependencies: [],
         countermeasures: [
           {
-            id: 'cm-sample-1',
-            issue: 'Customer adoption rate below target for new digital channels',
-            action: 'Launch targeted training program and incentive campaign to drive usage',
-            owner: 'Marketing Team',
-            dueDate: '2024-04-30',
+            id: 'cm-strategyos-1',
+            issue: 'User testing shows framework selection is confusing for new users',
+            action: 'Add guided onboarding flow with framework recommendations based on org type',
+            owner: 'UX Team',
+            dueDate: '2024-05-15',
             status: 'in-progress',
-            createdAt: new Date('2024-03-15').toISOString()
+            createdAt: new Date('2024-04-10').toISOString()
           }
         ],
         objectives: [
           {
-            id: 'obj-sample-1',
-            projectId: 'proj-sample-1',
+            id: 'obj-strategyos-1',
+            projectId: 'proj-strategyos-1',
             category: 'breakthrough',
-            description: 'Achieve 95% digital adoption across all customer touchpoints',
-            owner: 'Sarah Chen',
-            targetDate: '2024-12-31',
+            description: 'Replace spreadsheet-based strategy creation for 100 pilot organizations',
+            owner: 'Product Team',
+            targetDate: '2024-06-30',
             status: 'on-track',
             metrics: [
               {
-                id: 'metric-sample-1',
-                name: 'Digital Channel Usage Rate',
-                baseline: 45,
-                current: 68,
-                target: 95,
-                unit: '%',
-                frequency: 'monthly',
+                id: 'metric-strategyos-1',
+                name: 'Organizations Using Strategy Cards',
+                baseline: 0,
+                current: 62,
+                target: 100,
+                unit: ' orgs',
+                frequency: 'weekly',
                 lastUpdated: new Date().toISOString(),
                 trend: 'improving'
               },
               {
-                id: 'metric-sample-2',
-                name: 'Customer Satisfaction Score',
-                baseline: 72,
-                current: 81,
-                target: 90,
-                unit: 'pts',
-                frequency: 'quarterly',
+                id: 'metric-strategyos-2',
+                name: 'User Satisfaction Score (NPS)',
+                baseline: 0,
+                current: 48,
+                target: 60,
+                unit: ' pts',
+                frequency: 'monthly',
                 lastUpdated: new Date().toISOString(),
                 trend: 'improving'
               }
             ]
           },
           {
-            id: 'obj-sample-2',
-            projectId: 'proj-sample-1',
+            id: 'obj-strategyos-2',
+            projectId: 'proj-strategyos-1',
             category: 'annual',
-            description: 'Reduce manual processing time by 50% through automation',
-            owner: 'Michael Torres',
-            targetDate: '2024-09-30',
-            status: 'at-risk',
-            metrics: [
-              {
-                id: 'metric-sample-3',
-                name: 'Process Automation Rate',
-                baseline: 20,
-                current: 35,
-                target: 70,
-                unit: '%',
-                frequency: 'monthly',
-                lastUpdated: new Date().toISOString(),
-                trend: 'stable'
-              }
-            ]
-          }
-        ],
-        metrics: [
-          {
-            id: 'metric-sample-4',
-            name: 'Overall Project Completion',
-            baseline: 0,
-            current: 45,
-            target: 100,
-            unit: '%',
-            frequency: 'weekly',
-            lastUpdated: new Date().toISOString(),
-            trend: 'improving'
-          },
-          {
-            id: 'metric-sample-5',
-            name: 'Budget Utilization',
-            baseline: 0,
-            current: 38,
-            target: 100,
-            unit: '%',
-            frequency: 'monthly',
-            lastUpdated: new Date().toISOString(),
-            trend: 'improving'
-          }
-        ]
-      },
-      {
-        id: 'proj-sample-2',
-        name: 'Operational Excellence Program',
-        description: 'Drive continuous improvement across manufacturing and supply chain operations',
-        owner: 'James Wilson',
-        status: 'on-track',
-        priority: 'high',
-        startDate: '2024-02-01',
-        endDate: '2024-11-30',
-        progress: 62,
-        budget: 1200000,
-        actualSpend: 720000,
-        dependencies: [],
-        countermeasures: [
-          {
-            id: 'cm-sample-2',
-            issue: 'Equipment downtime exceeding targets in production line 3',
-            action: 'Implement predictive maintenance system and increase preventive maintenance frequency',
-            owner: 'James Wilson',
-            dueDate: '2024-05-15',
-            status: 'open',
-            createdAt: new Date('2024-04-01').toISOString()
-          }
-        ],
-        objectives: [
-          {
-            id: 'obj-sample-3',
-            projectId: 'proj-sample-2',
-            category: 'improvement',
-            description: 'Reduce production cycle time by 25%',
-            owner: 'James Wilson',
-            targetDate: '2024-08-31',
+            description: 'Support 5 strategic frameworks with guided workflows',
+            owner: 'Engineering Team',
+            targetDate: '2024-05-31',
             status: 'on-track',
             metrics: [
               {
-                id: 'metric-sample-6',
-                name: 'Average Cycle Time',
-                baseline: 120,
-                current: 95,
-                target: 90,
-                unit: 'hrs',
+                id: 'metric-strategyos-3',
+                name: 'Frameworks Implemented',
+                baseline: 0,
+                current: 4,
+                target: 5,
+                unit: ' frameworks',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          },
+          {
+            id: 'obj-strategyos-3',
+            projectId: 'proj-strategyos-1',
+            category: 'improvement',
+            description: 'Reduce strategy creation time from 40 hours to 8 hours',
+            owner: 'Product Team',
+            targetDate: '2024-06-30',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-strategyos-4',
+                name: 'Avg Time to Complete Strategy Card',
+                baseline: 40,
+                current: 12,
+                target: 8,
+                unit: ' hrs',
                 frequency: 'weekly',
                 lastUpdated: new Date().toISOString(),
                 trend: 'improving'
@@ -2228,26 +2177,396 @@ export default function Roadmap() {
         ],
         metrics: [
           {
-            id: 'metric-sample-7',
-            name: 'Overall Equipment Effectiveness',
-            baseline: 72,
-            current: 84,
-            target: 85,
-            unit: '%',
-            frequency: 'daily',
-            lastUpdated: new Date().toISOString(),
-            trend: 'improving'
-          },
-          {
-            id: 'metric-sample-8',
-            name: 'Defect Rate',
-            baseline: 5.2,
-            current: 2.8,
-            target: 2.0,
+            id: 'metric-strategyos-5',
+            name: 'Feature Completion Rate',
+            baseline: 0,
+            current: 65,
+            target: 100,
             unit: '%',
             frequency: 'weekly',
             lastUpdated: new Date().toISOString(),
             trend: 'improving'
+          },
+          {
+            id: 'metric-strategyos-6',
+            name: 'Test Coverage',
+            baseline: 45,
+            current: 82,
+            target: 90,
+            unit: '%',
+            frequency: 'daily',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          }
+        ]
+      },
+      {
+        id: 'proj-strategyos-2',
+        name: 'Workbench - Execution Engine',
+        description: 'Build strategy execution, tracking, and governance capabilities with Hoshin Kanri support',
+        owner: 'Engineering Lead',
+        status: 'on-track',
+        priority: 'critical',
+        startDate: '2024-03-01',
+        endDate: '2024-09-30',
+        progress: 38,
+        budget: 1250000,
+        actualSpend: 385000,
+        dependencies: ['proj-strategyos-1'],
+        countermeasures: [
+          {
+            id: 'cm-strategyos-2',
+            issue: 'Portfolio-level dashboard queries taking >5s with large datasets',
+            action: 'Implement data caching layer and optimize aggregation queries',
+            owner: 'Backend Team',
+            dueDate: '2024-06-01',
+            status: 'in-progress',
+            createdAt: new Date('2024-04-15').toISOString()
+          },
+          {
+            id: 'cm-strategyos-3',
+            issue: 'OKR integration requires manual data entry, reducing adoption',
+            action: 'Build bi-directional sync with top 3 OKR platforms (Lattice, 15Five, Betterworks)',
+            owner: 'Integration Team',
+            dueDate: '2024-07-31',
+            status: 'open',
+            createdAt: new Date('2024-04-20').toISOString()
+          }
+        ],
+        objectives: [
+          {
+            id: 'obj-strategyos-4',
+            projectId: 'proj-strategyos-2',
+            category: 'breakthrough',
+            description: 'Provide single source of truth for strategy execution across 50 organizations',
+            owner: 'Engineering Lead',
+            targetDate: '2024-09-30',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-strategyos-7',
+                name: 'Organizations Using Workbench',
+                baseline: 0,
+                current: 18,
+                target: 50,
+                unit: ' orgs',
+                frequency: 'weekly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              },
+              {
+                id: 'metric-strategyos-8',
+                name: 'Initiatives Tracked in Platform',
+                baseline: 0,
+                current: 342,
+                target: 1000,
+                unit: ' initiatives',
+                frequency: 'daily',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          },
+          {
+            id: 'obj-strategyos-5',
+            projectId: 'proj-strategyos-2',
+            category: 'annual',
+            description: 'Support 4 execution methodologies (SPM, Hoshin Kanri, OKRs, OpEx)',
+            owner: 'Product Team',
+            targetDate: '2024-08-31',
+            status: 'at-risk',
+            metrics: [
+              {
+                id: 'metric-strategyos-9',
+                name: 'Methodologies Supported',
+                baseline: 0,
+                current: 2,
+                target: 4,
+                unit: ' methods',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'stable'
+              }
+            ]
+          },
+          {
+            id: 'obj-strategyos-6',
+            projectId: 'proj-strategyos-2',
+            category: 'improvement',
+            description: 'Eliminate 80% of manual reporting work through automation',
+            owner: 'Product Team',
+            targetDate: '2024-09-30',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-strategyos-10',
+                name: 'Manual Reporting Hours Saved',
+                baseline: 0,
+                current: 55,
+                target: 80,
+                unit: '%',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          }
+        ],
+        metrics: [
+          {
+            id: 'metric-strategyos-11',
+            name: 'Workbench Feature Completion',
+            baseline: 0,
+            current: 38,
+            target: 100,
+            unit: '%',
+            frequency: 'weekly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          },
+          {
+            id: 'metric-strategyos-12',
+            name: 'Real-time Dashboard Performance',
+            baseline: 8500,
+            current: 1200,
+            target: 500,
+            unit: 'ms',
+            frequency: 'daily',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          }
+        ]
+      },
+      {
+        id: 'proj-strategyos-3',
+        name: 'Enterprise Integration Layer',
+        description: 'Build integrations with ERP, CRM, and project management tools for unified data',
+        owner: 'Integration Team',
+        status: 'on-track',
+        priority: 'high',
+        startDate: '2024-05-01',
+        endDate: '2024-11-30',
+        progress: 22,
+        budget: 680000,
+        actualSpend: 145000,
+        dependencies: ['proj-strategyos-2'],
+        countermeasures: [],
+        objectives: [
+          {
+            id: 'obj-strategyos-7',
+            projectId: 'proj-strategyos-3',
+            category: 'annual',
+            description: 'Integrate with 10 enterprise systems to eliminate data silos',
+            owner: 'Integration Team',
+            targetDate: '2024-11-30',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-strategyos-13',
+                name: 'Systems Integrated',
+                baseline: 0,
+                current: 3,
+                target: 10,
+                unit: ' systems',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          },
+          {
+            id: 'obj-strategyos-8',
+            projectId: 'proj-strategyos-3',
+            category: 'improvement',
+            description: 'Achieve 99.5% uptime for all integration endpoints',
+            owner: 'DevOps Team',
+            targetDate: '2024-11-30',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-strategyos-14',
+                name: 'Integration Uptime',
+                baseline: 96.8,
+                current: 98.9,
+                target: 99.5,
+                unit: '%',
+                frequency: 'daily',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          }
+        ],
+        metrics: [
+          {
+            id: 'metric-strategyos-15',
+            name: 'Integration Development Progress',
+            baseline: 0,
+            current: 22,
+            target: 100,
+            unit: '%',
+            frequency: 'weekly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          },
+          {
+            id: 'metric-strategyos-16',
+            name: 'Data Sync Accuracy',
+            baseline: 92,
+            current: 97.5,
+            target: 99.9,
+            unit: '%',
+            frequency: 'daily',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          }
+        ]
+      },
+      {
+        id: 'proj-strategyos-4',
+        name: 'Portfolio Management & Governance',
+        description: 'Build portfolio structuring, capacity planning, and governance capabilities',
+        owner: 'Product Team',
+        status: 'not-started',
+        priority: 'high',
+        startDate: '2024-07-01',
+        endDate: '2024-12-31',
+        progress: 0,
+        budget: 920000,
+        actualSpend: 0,
+        dependencies: ['proj-strategyos-2'],
+        countermeasures: [],
+        objectives: [
+          {
+            id: 'obj-strategyos-9',
+            projectId: 'proj-strategyos-4',
+            category: 'breakthrough',
+            description: 'Enable portfolio-level prioritization and resource allocation',
+            owner: 'Product Team',
+            targetDate: '2024-12-31',
+            status: 'not-started',
+            metrics: [
+              {
+                id: 'metric-strategyos-17',
+                name: 'Portfolios Managed in System',
+                baseline: 0,
+                current: 0,
+                target: 75,
+                unit: ' portfolios',
+                frequency: 'weekly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'stable'
+              }
+            ]
+          },
+          {
+            id: 'obj-strategyos-10',
+            projectId: 'proj-strategyos-4',
+            category: 'annual',
+            description: 'Support 5 portfolio domains (M&A, OpEx, FinTrans, ESG, Innovation)',
+            owner: 'Engineering Team',
+            targetDate: '2024-11-30',
+            status: 'not-started',
+            metrics: [
+              {
+                id: 'metric-strategyos-18',
+                name: 'Portfolio Domains Supported',
+                baseline: 0,
+                current: 0,
+                target: 5,
+                unit: ' domains',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'stable'
+              }
+            ]
+          }
+        ],
+        metrics: [
+          {
+            id: 'metric-strategyos-19',
+            name: 'Portfolio Feature Completion',
+            baseline: 0,
+            current: 0,
+            target: 100,
+            unit: '%',
+            frequency: 'weekly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'stable'
+          }
+        ]
+      },
+      {
+        id: 'proj-strategyos-5',
+        name: 'Financial Visibility & Tracking',
+        description: 'Link strategy execution to financial outcomes and savings realization',
+        owner: 'Finance Integration Lead',
+        status: 'not-started',
+        priority: 'medium',
+        startDate: '2024-08-01',
+        endDate: '2024-12-31',
+        progress: 0,
+        budget: 450000,
+        actualSpend: 0,
+        dependencies: ['proj-strategyos-2', 'proj-strategyos-3'],
+        countermeasures: [],
+        objectives: [
+          {
+            id: 'obj-strategyos-11',
+            projectId: 'proj-strategyos-5',
+            category: 'annual',
+            description: 'Provide shared visibility between Operations and Finance teams',
+            owner: 'Finance Integration Lead',
+            targetDate: '2024-12-31',
+            status: 'not-started',
+            metrics: [
+              {
+                id: 'metric-strategyos-20',
+                name: 'Finance System Integrations',
+                baseline: 0,
+                current: 0,
+                target: 5,
+                unit: ' systems',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'stable'
+              }
+            ]
+          },
+          {
+            id: 'obj-strategyos-12',
+            projectId: 'proj-strategyos-5',
+            category: 'improvement',
+            description: 'Automate savings tracking and value realization reporting',
+            owner: 'Product Team',
+            targetDate: '2024-12-31',
+            status: 'not-started',
+            metrics: [
+              {
+                id: 'metric-strategyos-21',
+                name: 'Automated Financial Reports',
+                baseline: 0,
+                current: 0,
+                target: 8,
+                unit: ' reports',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'stable'
+              }
+            ]
+          }
+        ],
+        metrics: [
+          {
+            id: 'metric-strategyos-22',
+            name: 'Financial Feature Completion',
+            baseline: 0,
+            current: 0,
+            target: 100,
+            unit: '%',
+            frequency: 'weekly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'stable'
           }
         ]
       }
@@ -2264,7 +2583,7 @@ export default function Roadmap() {
         <p className="text-muted-foreground mt-1">Hoshin Kanri planning and execution tracking</p>
       </div>
 
-      {projects && projects.length > 0 && projects[0].id === 'proj-sample-1' && (
+      {projects && projects.length > 0 && projects[0].id === 'proj-strategyos-1' && (
         <Card className="border-accent/50 bg-accent/5">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
@@ -2272,10 +2591,11 @@ export default function Roadmap() {
                 <Target size={24} className="text-accent" weight="bold" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-sm mb-1">Sample Projects Loaded</h3>
+                <h3 className="font-semibold text-sm mb-1">StrategyOS Product Roadmap Loaded</h3>
                 <p className="text-sm text-muted-foreground">
-                  We've added two sample projects to help you explore the Roadmap features. You can add objectives and metrics to projects, 
-                  track progress, and visualize strategic alignment. Feel free to delete these and create your own!
+                  This roadmap tracks the development of StrategyOS itself - including Strategy Cards, Workbench, Enterprise Integrations, 
+                  Portfolio Management, and Financial Visibility features. This demonstrates how StrategyOS uses its own platform for strategic planning 
+                  and execution. Feel free to explore the X-Matrix, Bowling Charts, and other Hoshin Kanri views!
                 </p>
               </div>
             </div>
