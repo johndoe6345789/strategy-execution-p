@@ -2070,7 +2070,7 @@ export default function Roadmap() {
   const [projects, setProjects] = useKV<RoadmapProject[]>('roadmap-projects', [])
   const [hasInitialized, setHasInitialized] = useKV<boolean>('roadmap-initialized', false)
 
-  if (!projects || projects.length === 0) {
+  if ((!projects || projects.length === 0) && !hasInitialized) {
     const sampleProjects: RoadmapProject[] = [
       {
         id: 'proj-strategyos-1',
@@ -2579,8 +2579,8 @@ export default function Roadmap() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Strategic Roadmap</h2>
-        <p className="text-muted-foreground mt-1">Hoshin Kanri planning and execution tracking</p>
+        <h2 className="text-2xl font-semibold tracking-tight">StrategyOS Product Roadmap</h2>
+        <p className="text-muted-foreground mt-1">Internal product development roadmap using Hoshin Kanri methodology</p>
       </div>
 
       {projects && projects.length > 0 && projects[0].id === 'proj-strategyos-1' && (
