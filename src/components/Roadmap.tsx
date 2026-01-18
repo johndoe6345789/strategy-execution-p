@@ -24,7 +24,8 @@ import {
   Plus,
   FolderOpen,
   Trash,
-  PencilSimple
+  PencilSimple,
+  CalendarBlank
 } from '@phosphor-icons/react'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
@@ -659,60 +660,6 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
   )
 }
 
-const mockBowlingChart: BowlingChartData[] = [
-  {
-    objective: 'Revenue Growth 25%',
-    months: [
-      { month: 'Jan', status: 'green', actual: 102, target: 102 },
-      { month: 'Feb', status: 'green', actual: 105, target: 104 },
-      { month: 'Mar', status: 'yellow', actual: 107, target: 108 },
-      { month: 'Apr', status: 'green', actual: 111, target: 110 },
-      { month: 'May', status: 'green', actual: 115, target: 113 },
-      { month: 'Jun', status: 'not-started', actual: 0, target: 116 },
-      { month: 'Jul', status: 'not-started', actual: 0, target: 118 },
-      { month: 'Aug', status: 'not-started', actual: 0, target: 120 },
-      { month: 'Sep', status: 'not-started', actual: 0, target: 122 },
-      { month: 'Oct', status: 'not-started', actual: 0, target: 123 },
-      { month: 'Nov', status: 'not-started', actual: 0, target: 124 },
-      { month: 'Dec', status: 'not-started', actual: 0, target: 125 }
-    ]
-  },
-  {
-    objective: 'Cost Reduction 15%',
-    months: [
-      { month: 'Jan', status: 'green', actual: 98, target: 98 },
-      { month: 'Feb', status: 'yellow', actual: 96, target: 95 },
-      { month: 'Mar', status: 'yellow', actual: 94, target: 92 },
-      { month: 'Apr', status: 'red', actual: 93, target: 90 },
-      { month: 'May', status: 'yellow', actual: 92, target: 88 },
-      { month: 'Jun', status: 'not-started', actual: 0, target: 87 },
-      { month: 'Jul', status: 'not-started', actual: 0, target: 86 },
-      { month: 'Aug', status: 'not-started', actual: 0, target: 86 },
-      { month: 'Sep', status: 'not-started', actual: 0, target: 85 },
-      { month: 'Oct', status: 'not-started', actual: 0, target: 85 },
-      { month: 'Nov', status: 'not-started', actual: 0, target: 85 },
-      { month: 'Dec', status: 'not-started', actual: 0, target: 85 }
-    ]
-  },
-  {
-    objective: 'Customer Satisfaction 95%',
-    months: [
-      { month: 'Jan', status: 'green', actual: 75, target: 75 },
-      { month: 'Feb', status: 'green', actual: 78, target: 77 },
-      { month: 'Mar', status: 'green', actual: 81, target: 80 },
-      { month: 'Apr', status: 'green', actual: 84, target: 83 },
-      { month: 'May', status: 'green', actual: 87, target: 86 },
-      { month: 'Jun', status: 'not-started', actual: 0, target: 89 },
-      { month: 'Jul', status: 'not-started', actual: 0, target: 91 },
-      { month: 'Aug', status: 'not-started', actual: 0, target: 92 },
-      { month: 'Sep', status: 'not-started', actual: 0, target: 93 },
-      { month: 'Oct', status: 'not-started', actual: 0, target: 94 },
-      { month: 'Nov', status: 'not-started', actual: 0, target: 94 },
-      { month: 'Dec', status: 'not-started', actual: 0, target: 95 }
-    ]
-  }
-]
-
 function ObjectivesView({ projects, setProjects }: { projects: RoadmapProject[], setProjects: (updater: (prev: RoadmapProject[]) => RoadmapProject[]) => void }) {
   const [isAddingMetricToObjective, setIsAddingMetricToObjective] = useState(false)
   const [selectedObjectiveId, setSelectedObjectiveId] = useState<string>('')
@@ -980,10 +927,34 @@ function ObjectivesView({ projects, setProjects }: { projects: RoadmapProject[],
   )
 }
 
-function MetricsView({ projects }: { projects: RoadmapProject[] }) {
+function MetricsView({ projects, setProjects }: { projects: RoadmapProject[], setProjects: (updater: (prev: RoadmapProject[]) => RoadmapProject[]) => void }) {
+  const [editingMetric, setEditingMetric] = useState<RoadmapMetric & { projectId: string } | null>(null)
+  const [isUpdatingMetric, setIsUpdatingMetric] = useState(false)
+  const [newValue, setNewValue] = useState<number>(0)
+
   const allMetrics = projects.flatMap(project => 
-    project.metrics.map(m => ({ ...m, projectName: project.name }))
+    project.metrics.map(m => ({ ...m, projectName: project.name, projectId: project.id }))
   )
+
+  const handleUpdateMetric = () => {
+    if (!editingMetric) return
+
+    setProjects((prev) => prev.map(p => {
+      if (p.id !== editingMetric.projectId) return p
+      return {
+        ...p,
+        metrics: p.metrics.map(m =>
+          m.id === editingMetric.id
+            ? { ...m, current: newValue, lastUpdated: new Date().toISOString() }
+            : m
+        )
+      }
+    }))
+
+    setIsUpdatingMetric(false)
+    setEditingMetric(null)
+    toast.success('Metric updated successfully')
+  }
 
   const trendIcons = {
     improving: <TrendUp size={16} className="text-success" weight="bold" />,
@@ -1003,68 +974,124 @@ function MetricsView({ projects }: { projects: RoadmapProject[] }) {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Metrics Dashboard</CardTitle>
-          <CardDescription>Track all key performance indicators</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {allMetrics.map((metric) => {
-              const progressPercent = ((metric.current - metric.baseline) / (metric.target - metric.baseline)) * 100
-              const variance = metric.current - metric.target
-              const variancePercent = (variance / metric.target) * 100
-              
-              return (
-                <div key={metric.id} className="p-4 border border-border rounded-lg space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold">{metric.name}</h4>
-                        {trendIcons[metric.trend]}
+    <>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Metrics Dashboard</CardTitle>
+            <CardDescription>Track all key performance indicators</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {allMetrics.map((metric) => {
+                const progressPercent = ((metric.current - metric.baseline) / (metric.target - metric.baseline)) * 100
+                const variance = metric.current - metric.target
+                const variancePercent = (variance / metric.target) * 100
+                
+                return (
+                  <div key={metric.id} className="p-4 border border-border rounded-lg space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold">{metric.name}</h4>
+                          {trendIcons[metric.trend]}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{metric.projectName}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">{metric.projectName}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="font-mono shrink-0">
+                          {metric.frequency}
+                        </Badge>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setEditingMetric(metric)
+                            setNewValue(metric.current)
+                            setIsUpdatingMetric(true)
+                          }}
+                        >
+                          <PencilSimple size={16} />
+                        </Button>
+                      </div>
                     </div>
-                    <Badge variant="outline" className="font-mono shrink-0">
-                      {metric.frequency}
-                    </Badge>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <div className="text-muted-foreground text-xs mb-1">Baseline</div>
+                        <div className="font-semibold font-mono">{metric.baseline}{metric.unit}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs mb-1">Current</div>
+                        <div className="font-semibold font-mono text-accent">{metric.current}{metric.unit}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground text-xs mb-1">Target</div>
+                        <div className="font-semibold font-mono">{metric.target}{metric.unit}</div>
+                      </div>
+                    </div>
+                    
+                    <Progress value={Math.min(progressPercent, 100)} className="h-2" />
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={variance >= 0 ? 'text-success' : 'text-destructive'}>
+                        Variance: {variance > 0 ? '+' : ''}{variance.toFixed(1)}{metric.unit} ({variancePercent > 0 ? '+' : ''}{variancePercent.toFixed(1)}%)
+                      </span>
+                      <span className="text-muted-foreground">Last updated: {new Date(metric.lastUpdated).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <div className="text-muted-foreground text-xs mb-1">Baseline</div>
-                      <div className="font-semibold font-mono">{metric.baseline}{metric.unit}</div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground text-xs mb-1">Current</div>
-                      <div className="font-semibold font-mono text-accent">{metric.current}{metric.unit}</div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground text-xs mb-1">Target</div>
-                      <div className="font-semibold font-mono">{metric.target}{metric.unit}</div>
-                    </div>
-                  </div>
-                  
-                  <Progress value={Math.min(progressPercent, 100)} className="h-2" />
-                  
-                  <div className="flex items-center justify-between text-xs">
-                    <span className={variance >= 0 ? 'text-success' : 'text-destructive'}>
-                      Variance: {variance > 0 ? '+' : ''}{variance.toFixed(1)}{metric.unit} ({variancePercent > 0 ? '+' : ''}{variancePercent.toFixed(1)}%)
-                    </span>
-                    <span className="text-muted-foreground">Last updated: {new Date(metric.lastUpdated).toLocaleDateString()}</span>
-                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Dialog open={isUpdatingMetric} onOpenChange={setIsUpdatingMetric}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Metric Value</DialogTitle>
+            <DialogDescription>Enter the new current value for {editingMetric?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="new-value">Current Value</Label>
+              <Input
+                id="new-value"
+                type="number"
+                value={newValue}
+                onChange={(e) => setNewValue(parseFloat(e.target.value))}
+                placeholder="Enter new value"
+              />
+            </div>
+            {editingMetric && (
+              <div className="grid grid-cols-3 gap-4 text-sm p-3 bg-muted/30 rounded">
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Baseline</div>
+                  <div className="font-semibold font-mono">{editingMetric.baseline}{editingMetric.unit}</div>
                 </div>
-              )
-            })}
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">New Value</div>
+                  <div className="font-semibold font-mono text-accent">{newValue}{editingMetric.unit}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Target</div>
+                  <div className="font-semibold font-mono">{editingMetric.target}{editingMetric.unit}</div>
+                </div>
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUpdatingMetric(false)}>Cancel</Button>
+            <Button onClick={handleUpdateMetric}>Update Value</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
-function BowlingChartView() {
+function BowlingChartView({ projects }: { projects: RoadmapProject[] }) {
   const statusColors = {
     green: 'bg-success',
     yellow: 'bg-warning',
@@ -1079,6 +1106,56 @@ function BowlingChartView() {
     'not-started': 'Not Started'
   }
 
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  
+  const bowlingData: BowlingChartData[] = projects.flatMap(project => 
+    project.objectives.map(obj => {
+      const monthlyData = months.map((month, idx) => {
+        const avgProgress = obj.metrics.length > 0 
+          ? obj.metrics.reduce((sum, m) => {
+              const progress = ((m.current - m.baseline) / (m.target - m.baseline)) * 100
+              return sum + progress
+            }, 0) / obj.metrics.length
+          : 0
+
+        const currentMonth = new Date().getMonth()
+        const isNotStarted = idx > currentMonth
+        const targetProgress = ((idx + 1) / 12) * 100
+        
+        let status: 'green' | 'yellow' | 'red' | 'not-started' = 'not-started'
+        if (!isNotStarted) {
+          const diff = avgProgress - targetProgress
+          if (diff >= -5) status = 'green'
+          else if (diff >= -15) status = 'yellow'
+          else status = 'red'
+        }
+
+        return {
+          month,
+          status,
+          actual: isNotStarted ? 0 : Math.round(avgProgress),
+          target: Math.round(targetProgress)
+        }
+      })
+
+      return {
+        objective: obj.description,
+        months: monthlyData
+      }
+    })
+  )
+
+  if (bowlingData.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <ListChecks size={48} className="text-muted-foreground mb-4" />
+          <p className="text-muted-foreground text-center">No objectives to track. Add projects with objectives to see the bowling chart.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -1088,7 +1165,7 @@ function BowlingChartView() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {mockBowlingChart.map((item, idx) => (
+            {bowlingData.map((item, idx) => (
               <div key={idx} className="space-y-3">
                 {idx > 0 && <Separator />}
                 <h4 className="font-semibold">{item.objective}</h4>
@@ -1097,7 +1174,7 @@ function BowlingChartView() {
                     <div key={monthIdx} className="flex flex-col items-center gap-1">
                       <div 
                         className={`w-full aspect-square rounded-md ${statusColors[month.status]} flex items-center justify-center text-xs font-bold ${month.status === 'not-started' ? 'text-muted-foreground' : 'text-white'}`}
-                        title={month.status !== 'not-started' ? `Actual: ${month.actual}, Target: ${month.target}` : 'Not Started'}
+                        title={month.status !== 'not-started' ? `Actual: ${month.actual}%, Target: ${month.target}%` : 'Not Started'}
                       >
                         {month.status !== 'not-started' && month.actual}
                       </div>
@@ -1125,7 +1202,28 @@ function BowlingChartView() {
   )
 }
 
-function XMatrixView() {
+function XMatrixView({ projects }: { projects: RoadmapProject[] }) {
+  const allObjectives = projects.flatMap(p => p.objectives)
+  const annualObjectives = allObjectives.filter(o => o.category === 'annual')
+  const breakthroughObjectives = allObjectives.filter(o => o.category === 'breakthrough')
+  const improvementObjectives = allObjectives.filter(o => o.category === 'improvement')
+  
+  const allMetrics = projects.flatMap(p => p.metrics)
+  const topMetrics = allMetrics.slice(0, 4)
+
+  const hasData = projects.length > 0 && (annualObjectives.length > 0 || breakthroughObjectives.length > 0)
+
+  if (!hasData) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <GridFour size={48} className="text-muted-foreground mb-4" />
+          <p className="text-muted-foreground text-center">No data for X-Matrix. Add projects with objectives to see strategic alignment.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -1139,54 +1237,47 @@ function XMatrixView() {
               <div className="space-y-3">
                 <h4 className="font-semibold text-sm text-accent uppercase tracking-wider">Annual Objectives</h4>
                 <div className="space-y-2">
-                  <div className="p-3 border-l-4 border-accent bg-accent/5 rounded text-sm">
-                    25% Revenue Growth
-                  </div>
-                  <div className="p-3 border-l-4 border-accent bg-accent/5 rounded text-sm">
-                    15% Cost Reduction
-                  </div>
-                  <div className="p-3 border-l-4 border-accent bg-accent/5 rounded text-sm">
-                    95% Customer Satisfaction
-                  </div>
-                  <div className="p-3 border-l-4 border-accent bg-accent/5 rounded text-sm">
-                    Launch 3 New Products
-                  </div>
+                  {annualObjectives.length > 0 ? (
+                    annualObjectives.slice(0, 4).map((obj) => (
+                      <div key={obj.id} className="p-3 border-l-4 border-accent bg-accent/5 rounded text-sm">
+                        {obj.description}
+                      </div>
+                    ))
+                  ) : (
+                    breakthroughObjectives.slice(0, 4).map((obj) => (
+                      <div key={obj.id} className="p-3 border-l-4 border-accent bg-accent/5 rounded text-sm">
+                        {obj.description}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-semibold text-sm text-primary uppercase tracking-wider">Strategic Initiatives</h4>
+                <h4 className="font-semibold text-sm text-primary uppercase tracking-wider">Strategic Projects</h4>
                 <div className="space-y-2">
-                  <div className="p-3 border-l-4 border-primary bg-primary/5 rounded text-sm">
-                    Market Expansion Program
-                  </div>
-                  <div className="p-3 border-l-4 border-primary bg-primary/5 rounded text-sm">
-                    Process Automation
-                  </div>
-                  <div className="p-3 border-l-4 border-primary bg-primary/5 rounded text-sm">
-                    Customer Experience Transformation
-                  </div>
-                  <div className="p-3 border-l-4 border-primary bg-primary/5 rounded text-sm">
-                    Innovation Pipeline
-                  </div>
+                  {projects.slice(0, 4).map((project) => (
+                    <div key={project.id} className="p-3 border-l-4 border-primary bg-primary/5 rounded text-sm">
+                      {project.name}
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <div className="space-y-3">
                 <h4 className="font-semibold text-sm text-success uppercase tracking-wider">Key Metrics (KPIs)</h4>
                 <div className="space-y-2">
-                  <div className="p-3 border-l-4 border-success bg-success/5 rounded text-sm">
-                    Monthly Revenue Growth Rate
-                  </div>
-                  <div className="p-3 border-l-4 border-success bg-success/5 rounded text-sm">
-                    Operating Cost Ratio
-                  </div>
-                  <div className="p-3 border-l-4 border-success bg-success/5 rounded text-sm">
-                    Net Promoter Score
-                  </div>
-                  <div className="p-3 border-l-4 border-success bg-success/5 rounded text-sm">
-                    Time to Market
-                  </div>
+                  {topMetrics.length > 0 ? (
+                    topMetrics.map((metric) => (
+                      <div key={metric.id} className="p-3 border-l-4 border-success bg-success/5 rounded text-sm">
+                        {metric.name}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 border-l-4 border-muted bg-muted/5 rounded text-sm text-muted-foreground">
+                      No metrics defined yet
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1196,38 +1287,160 @@ function XMatrixView() {
             <div className="bg-muted/30 p-6 rounded-lg">
               <h4 className="font-semibold text-sm text-secondary uppercase tracking-wider mb-4">Improvement Tactics</h4>
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  Digital Marketing Campaign (Q1-Q2)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  Partnership Development (Q1-Q3)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  RPA Implementation (Q2-Q3)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  Lean Process Redesign (Q1-Q4)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  CX Training Program (Q1-Q2)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  Feedback System Redesign (Q2-Q3)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  R&D Investment Plan (Q1-Q4)
-                </div>
-                <div className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
-                  Agile Product Development (Q2-Q4)
-                </div>
+                {improvementObjectives.length > 0 ? (
+                  improvementObjectives.map((obj) => (
+                    <div key={obj.id} className="p-3 border-l-4 border-secondary bg-card rounded text-sm">
+                      {obj.description}
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="p-3 border-l-4 border-muted bg-card rounded text-sm text-muted-foreground">
+                      Add improvement objectives to projects
+                    </div>
+                    <div className="p-3 border-l-4 border-muted bg-card rounded text-sm text-muted-foreground">
+                      Tactics will appear here
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             <div className="mt-6 p-4 bg-accent/5 border border-accent/30 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <strong>Note:</strong> The X-Matrix creates strategic alignment by connecting Annual Objectives → Strategic Initiatives → Improvement Tactics → Key Metrics. 
+                <strong>Note:</strong> The X-Matrix creates strategic alignment by connecting Annual Objectives → Strategic Projects → Improvement Tactics → Key Metrics. 
                 Each connection represents a cause-and-effect relationship ensuring all activities drive toward strategic goals.
               </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function TimelineView({ projects }: { projects: RoadmapProject[] }) {
+  if (projects.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <CalendarBlank size={48} className="text-muted-foreground mb-4" />
+          <p className="text-muted-foreground text-center">No projects to display. Add projects to see the timeline.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const allDates = projects.flatMap(p => [new Date(p.startDate), new Date(p.endDate)])
+  const minDate = new Date(Math.min(...allDates.map(d => d.getTime())))
+  const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())))
+  
+  const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+  const monthsInRange = Math.ceil(totalDays / 30)
+  
+  const getProjectPosition = (startDate: string, endDate: string) => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const startOffset = Math.ceil((start.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+    const duration = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    
+    return {
+      left: `${(startOffset / totalDays) * 100}%`,
+      width: `${(duration / totalDays) * 100}%`
+    }
+  }
+
+  const statusColorsBg = {
+    'not-started': 'bg-muted',
+    'on-track': 'bg-success',
+    'at-risk': 'bg-warning',
+    'blocked': 'bg-destructive',
+    'completed': 'bg-primary'
+  }
+
+  const priorityBorders = {
+    'critical': 'border-destructive',
+    'high': 'border-warning',
+    'medium': 'border-primary',
+    'low': 'border-muted-foreground'
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Timeline</CardTitle>
+          <CardDescription>Gantt-style view of all strategic projects</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between text-sm text-muted-foreground border-b border-border pb-2">
+              <span className="font-semibold">
+                Timeline: {minDate.toLocaleDateString()} - {maxDate.toLocaleDateString()}
+              </span>
+              <span className="font-mono">
+                {monthsInRange} months
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {projects.map((project) => {
+                const position = getProjectPosition(project.startDate, project.endDate)
+                return (
+                  <div key={project.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <h4 className="font-semibold text-sm">{project.name}</h4>
+                        <Badge variant="outline" className={`${statusColorsBg[project.status]} text-white border-0 capitalize text-xs`}>
+                          {project.status.replace('-', ' ')}
+                        </Badge>
+                        <Badge variant="outline" className={`${priorityBorders[project.priority]} capitalize text-xs`}>
+                          {project.priority}
+                        </Badge>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(project.startDate).toLocaleDateString()} → {new Date(project.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    
+                    <div className="relative h-10 bg-muted/30 rounded-lg overflow-hidden">
+                      <div 
+                        className={`absolute h-full ${statusColorsBg[project.status]} rounded-lg flex items-center px-3 text-white text-xs font-semibold shadow-md border-l-4 ${priorityBorders[project.priority]}`}
+                        style={position}
+                      >
+                        <span className="truncate">{project.progress}%</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            
+            <Separator />
+            
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Status Legend</h5>
+                <div className="space-y-2">
+                  {Object.entries(statusColorsBg).map(([status, color]) => (
+                    <div key={status} className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded ${color}`} />
+                      <span className="text-sm capitalize">{status.replace('-', ' ')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Priority Legend</h5>
+                <div className="space-y-2">
+                  {Object.entries(priorityBorders).map(([priority, border]) => (
+                    <div key={priority} className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded border-2 ${border}`} />
+                      <span className="text-sm capitalize">{priority}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -1597,7 +1810,7 @@ export default function Roadmap() {
       )}
 
       <Tabs defaultValue="projects" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 h-14 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-7 h-14 bg-muted/50">
           <TabsTrigger value="projects" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <FolderOpen size={20} weight="bold" />
             Projects
@@ -1605,6 +1818,10 @@ export default function Roadmap() {
           <TabsTrigger value="dashboard" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Gauge size={20} weight="bold" />
             Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="timeline" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <CalendarBlank size={20} weight="bold" />
+            Timeline
           </TabsTrigger>
           <TabsTrigger value="objectives" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Target size={20} weight="bold" />
@@ -1632,20 +1849,24 @@ export default function Roadmap() {
           <DashboardView projects={projects || []} />
         </TabsContent>
 
+        <TabsContent value="timeline" className="mt-6">
+          <TimelineView projects={projects || []} />
+        </TabsContent>
+
         <TabsContent value="objectives" className="mt-6">
           <ObjectivesView projects={projects || []} setProjects={setProjects} />
         </TabsContent>
 
         <TabsContent value="metrics" className="mt-6">
-          <MetricsView projects={projects || []} />
+          <MetricsView projects={projects || []} setProjects={setProjects} />
         </TabsContent>
 
         <TabsContent value="bowling" className="mt-6">
-          <BowlingChartView />
+          <BowlingChartView projects={projects || []} />
         </TabsContent>
 
         <TabsContent value="xmatrix" className="mt-6">
-          <XMatrixView />
+          <XMatrixView projects={projects || []} />
         </TabsContent>
       </Tabs>
     </div>

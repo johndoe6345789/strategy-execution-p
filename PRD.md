@@ -40,6 +40,13 @@ This is an enterprise-grade platform requiring multiple interconnected views (St
 - **Progression**: View enterprise scorecard → Select portfolio or initiative → Drill into specific KPI → View trend & targets → Navigate to related initiatives
 - **Success criteria**: No ambiguity about performance; financial and operational metrics connected; accessible to all stakeholders
 
+### Strategic Roadmap with Hoshin Kanri
+- **Functionality**: Comprehensive project planning with objectives, metrics, bowling charts, X-Matrix, and timeline visualization
+- **Purpose**: Enable end-to-end strategic planning and execution tracking using proven Hoshin Kanri methodology
+- **Trigger**: User navigates to Roadmap tab and accesses sub-views (Projects, Dashboard, Timeline, Objectives, Metrics, Bowling Chart, X-Matrix)
+- **Progression**: Create project → Add objectives (breakthrough/annual/improvement) → Define metrics with baseline/current/target → Track progress → View bowling chart → Analyze X-Matrix alignment → Monitor timeline
+- **Success criteria**: Complete visibility of strategic execution; objectives linked to measurable metrics; monthly bowling chart shows status at a glance; X-Matrix demonstrates strategic alignment; timeline shows project scheduling and dependencies
+
 ### Strategy-to-Execution Traceability
 - **Functionality**: Visual relationship mapping showing how initiatives link to strategic goals and outcomes
 - **Purpose**: Ensure every activity directly supports strategic intent; identify gaps
