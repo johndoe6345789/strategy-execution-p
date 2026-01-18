@@ -40,6 +40,9 @@ interface XMatrixItem {
 function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], setProjects: (updater: (prev: RoadmapProject[]) => RoadmapProject[]) => void }) {
   const [isAddingProject, setIsAddingProject] = useState(false)
   const [editingProject, setEditingProject] = useState<RoadmapProject | null>(null)
+  const [isAddingObjective, setIsAddingObjective] = useState(false)
+  const [isAddingMetric, setIsAddingMetric] = useState(false)
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('')
   const [newProject, setNewProject] = useState<Partial<RoadmapProject>>({
     name: '',
     description: '',
@@ -51,6 +54,23 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
     progress: 0,
     objectives: [],
     metrics: []
+  })
+  const [newObjective, setNewObjective] = useState<Partial<RoadmapObjective>>({
+    category: 'annual',
+    description: '',
+    owner: '',
+    targetDate: '',
+    status: 'not-started',
+    metrics: []
+  })
+  const [newMetric, setNewMetric] = useState<Partial<RoadmapMetric>>({
+    name: '',
+    baseline: 0,
+    current: 0,
+    target: 0,
+    unit: '',
+    frequency: 'monthly',
+    trend: 'stable'
   })
 
   const handleAddProject = () => {
@@ -93,6 +113,94 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
   const handleDeleteProject = (projectId: string) => {
     setProjects((prev) => prev.filter(p => p.id !== projectId))
     toast.success('Project deleted')
+  }
+
+  const handleAddObjective = () => {
+    if (!newObjective.description || !newObjective.owner || !newObjective.targetDate) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    const objective: RoadmapObjective = {
+      id: `obj-${Date.now()}`,
+      projectId: selectedProjectId,
+      category: newObjective.category as 'breakthrough' | 'annual' | 'improvement',
+      description: newObjective.description,
+      owner: newObjective.owner,
+      targetDate: newObjective.targetDate,
+      status: newObjective.status as StatusType,
+      metrics: []
+    }
+
+    setProjects((prev) => prev.map(p => 
+      p.id === selectedProjectId 
+        ? { ...p, objectives: [...p.objectives, objective] }
+        : p
+    ))
+    
+    setIsAddingObjective(false)
+    setNewObjective({
+      category: 'annual',
+      description: '',
+      owner: '',
+      targetDate: '',
+      status: 'not-started',
+      metrics: []
+    })
+    toast.success('Objective added to project')
+  }
+
+  const handleAddMetric = () => {
+    if (!newMetric.name || !newMetric.unit) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    const metric: RoadmapMetric = {
+      id: `metric-${Date.now()}`,
+      name: newMetric.name || '',
+      baseline: newMetric.baseline || 0,
+      current: newMetric.current || 0,
+      target: newMetric.target || 0,
+      unit: newMetric.unit || '',
+      frequency: newMetric.frequency as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual',
+      lastUpdated: new Date().toISOString(),
+      trend: newMetric.trend as 'improving' | 'stable' | 'declining'
+    }
+
+    setProjects((prev) => prev.map(p => 
+      p.id === selectedProjectId 
+        ? { ...p, metrics: [...p.metrics, metric] }
+        : p
+    ))
+    
+    setIsAddingMetric(false)
+    setNewMetric({
+      name: '',
+      baseline: 0,
+      current: 0,
+      target: 0,
+      unit: '',
+      frequency: 'monthly',
+      trend: 'stable'
+    })
+    toast.success('Metric added to project')
+  }
+
+  const handleUpdateProjectProgress = (projectId: string) => {
+    setProjects((prev) => prev.map(p => {
+      if (p.id !== projectId) return p
+      
+      const totalMetrics = p.metrics.length
+      if (totalMetrics === 0) return p
+
+      const totalProgress = p.metrics.reduce((sum, metric) => {
+        const progress = ((metric.current - metric.baseline) / (metric.target - metric.baseline)) * 100
+        return sum + Math.max(0, Math.min(100, progress))
+      }, 0)
+
+      return { ...p, progress: Math.round(totalProgress / totalMetrics) }
+    }))
   }
 
   const statusColors = {
@@ -276,22 +384,277 @@ function ProjectsView({ projects, setProjects }: { projects: RoadmapProject[], s
                   
                   <Separator />
                   
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-muted-foreground">Objectives:</span>
-                      <span className="ml-2 font-semibold">{project.objectives.length}</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Objectives</span>
+                        <span className="text-sm font-semibold">{project.objectives.length}</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full gap-2"
+                        onClick={() => {
+                          setSelectedProjectId(project.id)
+                          setIsAddingObjective(true)
+                        }}
+                      >
+                        <Plus size={16} weight="bold" />
+                        Add Objective
+                      </Button>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Metrics:</span>
-                      <span className="ml-2 font-semibold">{project.metrics.length}</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Metrics</span>
+                        <span className="text-sm font-semibold">{project.metrics.length}</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full gap-2"
+                        onClick={() => {
+                          setSelectedProjectId(project.id)
+                          setIsAddingMetric(true)
+                        }}
+                      >
+                        <Plus size={16} weight="bold" />
+                        Add Metric
+                      </Button>
                     </div>
                   </div>
+
+                  {project.objectives.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Project Objectives</h5>
+                        {project.objectives.map((obj) => (
+                          <div key={obj.id} className="p-3 border border-border rounded-lg bg-muted/20">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <p className="text-sm font-medium flex-1">{obj.description}</p>
+                              <Badge variant="outline" className="shrink-0 text-xs capitalize">
+                                {obj.category}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Owner: {obj.owner} • Target: {new Date(obj.targetDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {project.metrics.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Project Metrics</h5>
+                        {project.metrics.map((metric) => {
+                          const progressPercent = ((metric.current - metric.baseline) / (metric.target - metric.baseline)) * 100
+                          return (
+                            <div key={metric.id} className="p-3 border border-border rounded-lg bg-muted/20">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-semibold">{metric.name}</span>
+                                <Badge variant="outline" className="font-mono text-xs">
+                                  {metric.current}{metric.unit} / {metric.target}{metric.unit}
+                                </Badge>
+                              </div>
+                              <Progress value={Math.max(0, Math.min(100, progressPercent))} className="h-1.5" />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog open={isAddingObjective} onOpenChange={setIsAddingObjective}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Objective to Project</DialogTitle>
+            <DialogDescription>Create a strategic objective with measurable outcomes</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="obj-description">Objective Description *</Label>
+              <Textarea
+                id="obj-description"
+                value={newObjective.description}
+                onChange={(e) => setNewObjective({ ...newObjective, description: e.target.value })}
+                placeholder="e.g., Achieve 25% revenue growth in Q2"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="obj-category">Category</Label>
+                <Select 
+                  value={newObjective.category} 
+                  onValueChange={(value) => setNewObjective({ ...newObjective, category: value as 'breakthrough' | 'annual' | 'improvement' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="breakthrough">Breakthrough Goal</SelectItem>
+                    <SelectItem value="annual">Annual Goal</SelectItem>
+                    <SelectItem value="improvement">Improvement Goal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="obj-owner">Owner *</Label>
+                <Input
+                  id="obj-owner"
+                  value={newObjective.owner}
+                  onChange={(e) => setNewObjective({ ...newObjective, owner: e.target.value })}
+                  placeholder="Objective owner"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="obj-targetDate">Target Date *</Label>
+                <Input
+                  id="obj-targetDate"
+                  type="date"
+                  value={newObjective.targetDate}
+                  onChange={(e) => setNewObjective({ ...newObjective, targetDate: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="obj-status">Status</Label>
+                <Select 
+                  value={newObjective.status} 
+                  onValueChange={(value) => setNewObjective({ ...newObjective, status: value as StatusType })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not-started">Not Started</SelectItem>
+                    <SelectItem value="on-track">On Track</SelectItem>
+                    <SelectItem value="at-risk">At Risk</SelectItem>
+                    <SelectItem value="blocked">Blocked</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddingObjective(false)}>Cancel</Button>
+            <Button onClick={handleAddObjective}>Add Objective</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAddingMetric} onOpenChange={setIsAddingMetric}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Metric to Project</DialogTitle>
+            <DialogDescription>Define a measurable KPI to track progress</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="metric-name">Metric Name *</Label>
+              <Input
+                id="metric-name"
+                value={newMetric.name}
+                onChange={(e) => setNewMetric({ ...newMetric, name: e.target.value })}
+                placeholder="e.g., Monthly Recurring Revenue"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="metric-baseline">Baseline</Label>
+                <Input
+                  id="metric-baseline"
+                  type="number"
+                  value={newMetric.baseline}
+                  onChange={(e) => setNewMetric({ ...newMetric, baseline: parseFloat(e.target.value) })}
+                  placeholder="0"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="metric-current">Current Value</Label>
+                <Input
+                  id="metric-current"
+                  type="number"
+                  value={newMetric.current}
+                  onChange={(e) => setNewMetric({ ...newMetric, current: parseFloat(e.target.value) })}
+                  placeholder="0"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="metric-target">Target</Label>
+                <Input
+                  id="metric-target"
+                  type="number"
+                  value={newMetric.target}
+                  onChange={(e) => setNewMetric({ ...newMetric, target: parseFloat(e.target.value) })}
+                  placeholder="0"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="metric-unit">Unit *</Label>
+                <Input
+                  id="metric-unit"
+                  value={newMetric.unit}
+                  onChange={(e) => setNewMetric({ ...newMetric, unit: e.target.value })}
+                  placeholder="e.g., $, %, pts"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="metric-frequency">Frequency</Label>
+                <Select 
+                  value={newMetric.frequency} 
+                  onValueChange={(value) => setNewMetric({ ...newMetric, frequency: value as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="annual">Annual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="metric-trend">Trend</Label>
+                <Select 
+                  value={newMetric.trend} 
+                  onValueChange={(value) => setNewMetric({ ...newMetric, trend: value as 'improving' | 'stable' | 'declining' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="improving">Improving</SelectItem>
+                    <SelectItem value="stable">Stable</SelectItem>
+                    <SelectItem value="declining">Declining</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddingMetric(false)}>Cancel</Button>
+            <Button onClick={handleAddMetric}>Add Metric</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -350,8 +713,66 @@ const mockBowlingChart: BowlingChartData[] = [
   }
 ]
 
-function ObjectivesView({ projects }: { projects: RoadmapProject[] }) {
-  const allObjectives = projects.flatMap(p => p.objectives)
+function ObjectivesView({ projects, setProjects }: { projects: RoadmapProject[], setProjects: (updater: (prev: RoadmapProject[]) => RoadmapProject[]) => void }) {
+  const [isAddingMetricToObjective, setIsAddingMetricToObjective] = useState(false)
+  const [selectedObjectiveId, setSelectedObjectiveId] = useState<string>('')
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+  const [newMetric, setNewMetric] = useState<Partial<RoadmapMetric>>({
+    name: '',
+    baseline: 0,
+    current: 0,
+    target: 0,
+    unit: '',
+    frequency: 'monthly',
+    trend: 'stable'
+  })
+
+  const allObjectivesWithProject = projects.flatMap(p => 
+    p.objectives.map(obj => ({ ...obj, projectName: p.name, projectId: p.id }))
+  )
+
+  const handleAddMetricToObjective = () => {
+    if (!newMetric.name || !newMetric.unit) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    const metric: RoadmapMetric = {
+      id: `metric-${Date.now()}`,
+      name: newMetric.name || '',
+      baseline: newMetric.baseline || 0,
+      current: newMetric.current || 0,
+      target: newMetric.target || 0,
+      unit: newMetric.unit || '',
+      frequency: newMetric.frequency as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual',
+      lastUpdated: new Date().toISOString(),
+      trend: newMetric.trend as 'improving' | 'stable' | 'declining'
+    }
+
+    setProjects((prev) => prev.map(p => {
+      if (p.id !== selectedProjectId) return p
+      return {
+        ...p,
+        objectives: p.objectives.map(obj =>
+          obj.id === selectedObjectiveId
+            ? { ...obj, metrics: [...obj.metrics, metric] }
+            : obj
+        )
+      }
+    }))
+    
+    setIsAddingMetricToObjective(false)
+    setNewMetric({
+      name: '',
+      baseline: 0,
+      current: 0,
+      target: 0,
+      unit: '',
+      frequency: 'monthly',
+      trend: 'stable'
+    })
+    toast.success('Metric added to objective')
+  }
 
   const categoryColors = {
     breakthrough: 'bg-accent/10 text-accent border-accent/30',
@@ -367,7 +788,7 @@ function ObjectivesView({ projects }: { projects: RoadmapProject[] }) {
     'not-started': <Circle size={20} className="text-muted-foreground" />
   }
 
-  if (allObjectives.length === 0) {
+  if (allObjectivesWithProject.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
@@ -379,8 +800,9 @@ function ObjectivesView({ projects }: { projects: RoadmapProject[] }) {
   }
 
   return (
-    <div className="space-y-4">
-      {allObjectives.map((objective) => (
+    <>
+      <div className="space-y-4">
+        {allObjectivesWithProject.map((objective) => (
         <Card key={objective.id}>
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
@@ -403,37 +825,158 @@ function ObjectivesView({ projects }: { projects: RoadmapProject[] }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Key Metrics</h4>
-              {objective.metrics.map((metric) => {
-                const progressPercent = ((metric.current - metric.baseline) / (metric.target - metric.baseline)) * 100
-                const isOnTrack = progressPercent >= 70
-                
-                return (
-                  <div key={metric.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm">{metric.name}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-muted-foreground">
-                          {metric.current}{metric.unit} / {metric.target}{metric.unit}
-                        </span>
-                        <Badge variant={isOnTrack ? "default" : "secondary"} className="font-mono text-xs">
-                          {Math.round(progressPercent)}%
-                        </Badge>
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Key Metrics</h4>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => {
+                    setSelectedObjectiveId(objective.id)
+                    setSelectedProjectId(objective.projectId)
+                    setIsAddingMetricToObjective(true)
+                  }}
+                >
+                  <Plus size={16} weight="bold" />
+                  Add Metric
+                </Button>
+              </div>
+              {objective.metrics.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No metrics yet</p>
+              ) : (
+                objective.metrics.map((metric) => {
+                  const progressPercent = ((metric.current - metric.baseline) / (metric.target - metric.baseline)) * 100
+                  const isOnTrack = progressPercent >= 70
+                  
+                  return (
+                    <div key={metric.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm">{metric.name}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground">
+                            {metric.current}{metric.unit} / {metric.target}{metric.unit}
+                          </span>
+                          <Badge variant={isOnTrack ? "default" : "secondary"} className="font-mono text-xs">
+                            {Math.round(progressPercent)}%
+                          </Badge>
+                        </div>
+                      </div>
+                      <Progress value={progressPercent} className="h-2" />
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Baseline: {metric.baseline}{metric.unit}</span>
+                        <span>Updated: {new Date(metric.lastUpdated).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <Progress value={progressPercent} className="h-2" />
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Baseline: {metric.baseline}{metric.unit}</span>
-                      <span>Updated: {new Date(metric.lastUpdated).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })
+              )}
             </div>
           </CardContent>
         </Card>
       ))}
     </div>
+
+    <Dialog open={isAddingMetricToObjective} onOpenChange={setIsAddingMetricToObjective}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Add Metric to Objective</DialogTitle>
+          <DialogDescription>Define a measurable KPI to track objective progress</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="obj-metric-name">Metric Name *</Label>
+            <Input
+              id="obj-metric-name"
+              value={newMetric.name}
+              onChange={(e) => setNewMetric({ ...newMetric, name: e.target.value })}
+              placeholder="e.g., Monthly Recurring Revenue"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="obj-metric-baseline">Baseline</Label>
+              <Input
+                id="obj-metric-baseline"
+                type="number"
+                value={newMetric.baseline}
+                onChange={(e) => setNewMetric({ ...newMetric, baseline: parseFloat(e.target.value) })}
+                placeholder="0"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="obj-metric-current">Current Value</Label>
+              <Input
+                id="obj-metric-current"
+                type="number"
+                value={newMetric.current}
+                onChange={(e) => setNewMetric({ ...newMetric, current: parseFloat(e.target.value) })}
+                placeholder="0"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="obj-metric-target">Target</Label>
+              <Input
+                id="obj-metric-target"
+                type="number"
+                value={newMetric.target}
+                onChange={(e) => setNewMetric({ ...newMetric, target: parseFloat(e.target.value) })}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="obj-metric-unit">Unit *</Label>
+              <Input
+                id="obj-metric-unit"
+                value={newMetric.unit}
+                onChange={(e) => setNewMetric({ ...newMetric, unit: e.target.value })}
+                placeholder="e.g., $, %, pts"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="obj-metric-frequency">Frequency</Label>
+              <Select 
+                value={newMetric.frequency} 
+                onValueChange={(value) => setNewMetric({ ...newMetric, frequency: value as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="obj-metric-trend">Trend</Label>
+              <Select 
+                value={newMetric.trend} 
+                onValueChange={(value) => setNewMetric({ ...newMetric, trend: value as 'improving' | 'stable' | 'declining' })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="improving">Improving</SelectItem>
+                  <SelectItem value="stable">Stable</SelectItem>
+                  <SelectItem value="declining">Declining</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsAddingMetricToObjective(false)}>Cancel</Button>
+          <Button onClick={handleAddMetricToObjective}>Add Metric</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </>
   )
 }
 
@@ -866,6 +1409,166 @@ function DashboardView({ projects }: { projects: RoadmapProject[] }) {
 
 export default function Roadmap() {
   const [projects, setProjects] = useKV<RoadmapProject[]>('roadmap-projects', [])
+  const [hasInitialized, setHasInitialized] = useKV<boolean>('roadmap-initialized', false)
+
+  if (!hasInitialized && (!projects || projects.length === 0)) {
+    const sampleProjects: RoadmapProject[] = [
+      {
+        id: 'proj-sample-1',
+        name: 'Digital Transformation Initiative',
+        description: 'Modernize core business processes and customer touchpoints through digital-first approach',
+        owner: 'Sarah Chen',
+        status: 'on-track',
+        priority: 'critical',
+        startDate: '2024-01-15',
+        endDate: '2024-12-31',
+        progress: 45,
+        objectives: [
+          {
+            id: 'obj-sample-1',
+            projectId: 'proj-sample-1',
+            category: 'breakthrough',
+            description: 'Achieve 95% digital adoption across all customer touchpoints',
+            owner: 'Sarah Chen',
+            targetDate: '2024-12-31',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-sample-1',
+                name: 'Digital Channel Usage Rate',
+                baseline: 45,
+                current: 68,
+                target: 95,
+                unit: '%',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              },
+              {
+                id: 'metric-sample-2',
+                name: 'Customer Satisfaction Score',
+                baseline: 72,
+                current: 81,
+                target: 90,
+                unit: 'pts',
+                frequency: 'quarterly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          },
+          {
+            id: 'obj-sample-2',
+            projectId: 'proj-sample-1',
+            category: 'annual',
+            description: 'Reduce manual processing time by 50% through automation',
+            owner: 'Michael Torres',
+            targetDate: '2024-09-30',
+            status: 'at-risk',
+            metrics: [
+              {
+                id: 'metric-sample-3',
+                name: 'Process Automation Rate',
+                baseline: 20,
+                current: 35,
+                target: 70,
+                unit: '%',
+                frequency: 'monthly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'stable'
+              }
+            ]
+          }
+        ],
+        metrics: [
+          {
+            id: 'metric-sample-4',
+            name: 'Overall Project Completion',
+            baseline: 0,
+            current: 45,
+            target: 100,
+            unit: '%',
+            frequency: 'weekly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          },
+          {
+            id: 'metric-sample-5',
+            name: 'Budget Utilization',
+            baseline: 0,
+            current: 38,
+            target: 100,
+            unit: '%',
+            frequency: 'monthly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          }
+        ]
+      },
+      {
+        id: 'proj-sample-2',
+        name: 'Operational Excellence Program',
+        description: 'Drive continuous improvement across manufacturing and supply chain operations',
+        owner: 'James Wilson',
+        status: 'on-track',
+        priority: 'high',
+        startDate: '2024-02-01',
+        endDate: '2024-11-30',
+        progress: 62,
+        objectives: [
+          {
+            id: 'obj-sample-3',
+            projectId: 'proj-sample-2',
+            category: 'improvement',
+            description: 'Reduce production cycle time by 25%',
+            owner: 'James Wilson',
+            targetDate: '2024-08-31',
+            status: 'on-track',
+            metrics: [
+              {
+                id: 'metric-sample-6',
+                name: 'Average Cycle Time',
+                baseline: 120,
+                current: 95,
+                target: 90,
+                unit: 'hrs',
+                frequency: 'weekly',
+                lastUpdated: new Date().toISOString(),
+                trend: 'improving'
+              }
+            ]
+          }
+        ],
+        metrics: [
+          {
+            id: 'metric-sample-7',
+            name: 'Overall Equipment Effectiveness',
+            baseline: 72,
+            current: 84,
+            target: 85,
+            unit: '%',
+            frequency: 'daily',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          },
+          {
+            id: 'metric-sample-8',
+            name: 'Defect Rate',
+            baseline: 5.2,
+            current: 2.8,
+            target: 2.0,
+            unit: '%',
+            frequency: 'weekly',
+            lastUpdated: new Date().toISOString(),
+            trend: 'improving'
+          }
+        ]
+      }
+    ]
+    
+    setProjects(() => sampleProjects)
+    setHasInitialized(() => true)
+  }
 
   return (
     <div className="space-y-6">
@@ -873,6 +1576,25 @@ export default function Roadmap() {
         <h2 className="text-2xl font-semibold tracking-tight">Strategic Roadmap</h2>
         <p className="text-muted-foreground mt-1">Hoshin Kanri planning and execution tracking</p>
       </div>
+
+      {projects && projects.length > 0 && projects[0].id === 'proj-sample-1' && (
+        <Card className="border-accent/50 bg-accent/5">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <div className="bg-accent/20 p-2 rounded-lg">
+                <Target size={24} className="text-accent" weight="bold" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm mb-1">Sample Projects Loaded</h3>
+                <p className="text-sm text-muted-foreground">
+                  We've added two sample projects to help you explore the Roadmap features. You can add objectives and metrics to projects, 
+                  track progress, and visualize strategic alignment. Feel free to delete these and create your own!
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="projects" className="w-full">
         <TabsList className="grid w-full grid-cols-6 h-14 bg-muted/50">
@@ -911,7 +1633,7 @@ export default function Roadmap() {
         </TabsContent>
 
         <TabsContent value="objectives" className="mt-6">
-          <ObjectivesView projects={projects || []} />
+          <ObjectivesView projects={projects || []} setProjects={setProjects} />
         </TabsContent>
 
         <TabsContent value="metrics" className="mt-6">
