@@ -1,7 +1,7 @@
 import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Strategy, ChartBar, FolderOpen, Target, MapTrifold, Rocket, ChartLine, TrendUp } from '@phosphor-icons/react'
+import { Strategy, ChartBar, FolderOpen, Target, MapTrifold, Rocket, ChartLine, TrendUp, ArrowsLeftRight, Tree, GridFour, Circle } from '@phosphor-icons/react'
 import StrategyCards from './components/StrategyCards'
 import Workbench from './components/Workbench'
 import Portfolios from './components/Portfolios'
@@ -10,6 +10,10 @@ import Roadmap from './components/Roadmap'
 import ProductRoadmap from './components/ProductRoadmap'
 import KPIDashboard from './components/KPIDashboard'
 import InitiativeTracker from './components/InitiativeTracker'
+import StrategyComparison from './components/StrategyComparison'
+import StrategyTraceability from './components/StrategyTraceability'
+import XMatrix from './components/XMatrix'
+import BowlingChart from './components/BowlingChart'
 import type { StrategyCard, Initiative } from './types'
 
 function App() {
@@ -46,10 +50,18 @@ function App() {
 
       <main className="container mx-auto px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-8 h-14 bg-muted/50">
+          <TabsList className="grid w-full grid-cols-12 mb-8 h-14 bg-muted/50">
             <TabsTrigger value="strategy" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Strategy size={18} weight="bold" />
               Strategy
+            </TabsTrigger>
+            <TabsTrigger value="comparison" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ArrowsLeftRight size={18} weight="bold" />
+              Compare
+            </TabsTrigger>
+            <TabsTrigger value="traceability" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Tree size={18} weight="bold" />
+              Trace
             </TabsTrigger>
             <TabsTrigger value="workbench" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ChartBar size={18} weight="bold" />
@@ -62,6 +74,14 @@ function App() {
             <TabsTrigger value="kpi" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ChartLine size={18} weight="bold" />
               KPIs
+            </TabsTrigger>
+            <TabsTrigger value="x-matrix" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <GridFour size={18} weight="bold" />
+              X-Matrix
+            </TabsTrigger>
+            <TabsTrigger value="bowling" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Circle size={18} weight="bold" />
+              Bowling
             </TabsTrigger>
             <TabsTrigger value="portfolios" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <FolderOpen size={18} weight="bold" />
@@ -85,6 +105,14 @@ function App() {
             <StrategyCards />
           </TabsContent>
 
+          <TabsContent value="comparison" className="mt-0">
+            <StrategyComparison />
+          </TabsContent>
+
+          <TabsContent value="traceability" className="mt-0">
+            <StrategyTraceability />
+          </TabsContent>
+
           <TabsContent value="workbench" className="mt-0">
             <Workbench />
           </TabsContent>
@@ -95,6 +123,14 @@ function App() {
 
           <TabsContent value="kpi" className="mt-0">
             <KPIDashboard />
+          </TabsContent>
+
+          <TabsContent value="x-matrix" className="mt-0">
+            <XMatrix />
+          </TabsContent>
+
+          <TabsContent value="bowling" className="mt-0">
+            <BowlingChart />
           </TabsContent>
 
           <TabsContent value="portfolios" className="mt-0">

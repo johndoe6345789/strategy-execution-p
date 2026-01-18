@@ -19,6 +19,13 @@ This is an enterprise-grade platform requiring multiple interconnected views (St
 - **Progression**: Select framework → Fill guided sections (Vision, Goals, Assumptions) → Add metrics → Review & Publish → Link to Workbench initiatives
 - **Success criteria**: User can create a complete strategy card in under 10 minutes; all critical strategic elements are captured with clear rationale
 
+### Strategy Comparison & Exploration
+- **Functionality**: Side-by-side comparison of multiple strategic options to evaluate and refine approaches
+- **Purpose**: Enable informed decision-making by comparing strategic alternatives across all key dimensions
+- **Trigger**: User navigates to "Compare" tab and selects two strategy cards
+- **Progression**: Select Strategy A → Select Strategy B → View side-by-side comparison → Analyze vision, goals, metrics, assumptions → Review summary metrics → Make strategic choice
+- **Success criteria**: Users can quickly identify strengths and weaknesses of competing strategies; comparison highlights meaningful differences in scope, metrics, and assumptions
+
 ### Initiative Execution Tracking
 - **Functionality**: Translate strategic objectives into trackable initiatives with owners, timelines, and KPIs
 - **Purpose**: Bridge the gap between strategy and execution with clear accountability
@@ -48,11 +55,25 @@ This is an enterprise-grade platform requiring multiple interconnected views (St
 - **Success criteria**: Complete visibility of strategic execution; objectives linked to measurable metrics; monthly bowling chart shows status at a glance; X-Matrix demonstrates strategic alignment; timeline shows project scheduling and dependencies
 
 ### Strategy-to-Execution Traceability
-- **Functionality**: Visual relationship mapping showing how initiatives link to strategic goals and outcomes
-- **Purpose**: Ensure every activity directly supports strategic intent; identify gaps
-- **Trigger**: User clicks "View Connections" or "Trace to Strategy" on any initiative
-- **Progression**: Select initiative or goal → View relationship map → Identify gaps or misalignments → Create new links or initiatives
-- **Success criteria**: Complete line of sight from daily work to enterprise strategy; no orphaned initiatives
+- **Functionality**: Visual relationship mapping showing how initiatives link to strategic goals and outcomes with orphan detection
+- **Purpose**: Ensure every activity directly supports strategic intent; identify gaps and misalignments
+- **Trigger**: User clicks "Trace" tab or "View Connections" on any initiative
+- **Progression**: Select strategy card → View all linked initiatives → Examine status and progress → Identify orphaned initiatives or strategies without initiatives → Create new links as needed
+- **Success criteria**: Complete line of sight from daily work to enterprise strategy; no orphaned initiatives; warnings surface for strategies without execution initiatives
+
+### X-Matrix for Hoshin Kanri
+- **Functionality**: Interactive X-Matrix aligning breakthrough objectives (3-5 year) with annual objectives, metrics, and improvement actions
+- **Purpose**: Enable visual strategic alignment using proven Hoshin Kanri methodology with relationship strength indicators
+- **Trigger**: User navigates to "X-Matrix" tab to build or view strategic alignment
+- **Progression**: Add breakthrough objectives → Add annual objectives → Define metrics → List improvement actions → Map relationships with strong/medium/weak indicators → Analyze alignment patterns
+- **Success criteria**: Complete visibility of strategic cascading from long-term breakthroughs to annual goals to tactical improvements; clear relationship strengths guide prioritization; gaps in alignment are immediately visible
+
+### Bowling Chart for Monthly Tracking
+- **Functionality**: Visual monthly progress tracking with red/yellow/green status indicators and actual vs target metrics
+- **Purpose**: Provide at-a-glance monthly status visibility using familiar stoplight indicators for rapid assessment
+- **Trigger**: User navigates to "Bowling" tab to view or update monthly status
+- **Progression**: Add objectives to track → Update monthly status (green/yellow/red) → Enter actual vs target values → View aggregate status counts → Identify trends and patterns
+- **Success criteria**: Instant recognition of problem areas through color coding; month-over-month trends visible; actual vs target metrics provide quantitative backup to qualitative status
 
 ## Edge Case Handling
 
