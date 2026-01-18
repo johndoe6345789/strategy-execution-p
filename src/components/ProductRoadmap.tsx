@@ -4,8 +4,15 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CheckCircle, Circle, Target, ChartBar, Users, Database, Rocket, Shield } from '@phosphor-icons/react'
-import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CheckCircle, Circle, Target, ChartBar, Users, Database, Rocket, Shield, Plus, FunnelSimple, CalendarBlank, ChatCircleText } from '@phosphor-icons/react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface RoadmapFeature {
   id: string
@@ -14,6 +21,9 @@ interface RoadmapFeature {
   category: 'strategy-cards' | 'workbench' | 'cross-product' | 'portfolio' | 'integration' | 'opex' | 'reporting' | 'non-functional'
   priority: 'critical' | 'high' | 'medium' | 'low'
   completed: boolean
+  estimatedDate?: string
+  completedDate?: string
+  notes?: string
 }
 
 const initialFeatures: RoadmapFeature[] = [
@@ -360,31 +370,93 @@ const priorityColors = {
 export default function ProductRoadmap() {
   const [features, setFeatures] = useKV<RoadmapFeature[]>('product-roadmap-features', initialFeatures)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [filterPriority, setFilterPriority] = useState<string>('all')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [editingFeature, setEditingFeature] = useState<RoadmapFeature | null>(null)
+  const [newFeature, setNewFeature] = useState({
+    name: '',
+    description: '',
+    category: 'strategy-cards' as const,
+    priority: 'medium' as const,
+    estimatedDate: '',
+    notes: ''
+  })
 
   const toggleFeature = (featureId: string) => {
     setFeatures((current) => 
       (current || []).map(f => 
-        f.id === featureId ? { ...f, completed: !f.completed } : f
+        f.id === featureId ? { 
+          ...f, 
+          completed: !f.completed,
+          completedDate: !f.completed ? new Date().toISOString().split('T')[0] : undefined
+        } : f
+      )
+    )
+    toast.success(features?.find(f => f.id === featureId)?.completed ? 'Feature reopened' : 'Feature completed!')
+  }
+
+  const addFeature = () => {
+    if (!newFeature.name.trim() || !newFeature.description.trim()) {
+      toast.error('Please fill in name and description')
+      return
+    }
+
+    const feature: RoadmapFeature = {
+      id: `custom-${Date.now()}`,
+      name: newFeature.name,
+      description: newFeature.description,
+      category: newFeature.category,
+      priority: newFeature.priority,
+      completed: false,
+      estimatedDate: newFeature.estimatedDate || undefined,
+      notes: newFeature.notes || undefined
+    }
+
+    setFeatures((current) => [...(current || []), feature])
+    setIsAddDialogOpen(false)
+    setNewFeature({
+      name: '',
+      description: '',
+      category: 'strategy-cards',
+      priority: 'medium',
+      estimatedDate: '',
+      notes: ''
+    })
+    toast.success('Feature added to roadmap!')
+  }
+
+  const updateFeatureNotes = (featureId: string, notes: string) => {
+    setFeatures((current) =>
+      (current || []).map(f =>
+        f.id === featureId ? { ...f, notes } : f
       )
     )
   }
 
+  const filteredFeatures = (features || []).filter(f => {
+    if (filterPriority !== 'all' && f.priority !== filterPriority) return false
+    if (filterStatus === 'completed' && !f.completed) return false
+    if (filterStatus === 'in-progress' && f.completed) return false
+    return true
+  })
+
   const categorizedFeatures = selectedCategory === 'all' 
     ? Object.keys(categoryConfig).map(cat => ({
         category: cat as keyof typeof categoryConfig,
-        features: (features || []).filter(f => f.category === cat)
+        features: filteredFeatures.filter(f => f.category === cat)
       }))
     : [{
         category: selectedCategory as keyof typeof categoryConfig,
-        features: (features || []).filter(f => f.category === selectedCategory)
+        features: filteredFeatures.filter(f => f.category === selectedCategory)
       }]
 
-  const totalFeatures = (features || []).length
-  const completedFeatures = (features || []).filter(f => f.completed).length
-  const completionPercentage = Math.round((completedFeatures / totalFeatures) * 100)
+  const totalFeatures = filteredFeatures.length
+  const completedFeatures = filteredFeatures.filter(f => f.completed).length
+  const completionPercentage = totalFeatures > 0 ? Math.round((completedFeatures / totalFeatures) * 100) : 0
 
   const categoryProgress = Object.keys(categoryConfig).map(cat => {
-    const categoryFeatures = (features || []).filter(f => f.category === cat)
+    const categoryFeatures = filteredFeatures.filter(f => f.category === cat)
     const completed = categoryFeatures.filter(f => f.completed).length
     const total = categoryFeatures.length
     return {
@@ -404,20 +476,162 @@ export default function ProductRoadmap() {
             Track development progress of core features and capabilities
           </p>
         </div>
-        <Card className="w-64">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{completedFeatures} of {totalFeatures}</span>
-                <span className="font-bold text-accent">{completionPercentage}%</span>
+        <div className="flex items-center gap-3">
+          <Card className="w-64">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{completedFeatures} of {totalFeatures}</span>
+                  <span className="font-bold text-accent">{completionPercentage}%</span>
+                </div>
+                <Progress value={completionPercentage} className="h-2" />
               </div>
-              <Progress value={completionPercentage} className="h-2" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus size={16} weight="bold" />
+                Add Feature
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Add Custom Feature</DialogTitle>
+                <DialogDescription>
+                  Add a new feature to your product roadmap
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="feature-name">Feature Name</Label>
+                  <Input
+                    id="feature-name"
+                    value={newFeature.name}
+                    onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
+                    placeholder="e.g., Advanced Analytics Dashboard"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="feature-description">Description</Label>
+                  <Textarea
+                    id="feature-description"
+                    value={newFeature.description}
+                    onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
+                    placeholder="Describe the feature and its value..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="feature-category">Category</Label>
+                    <Select
+                      value={newFeature.category}
+                      onValueChange={(value: any) => setNewFeature({ ...newFeature, category: value })}
+                    >
+                      <SelectTrigger id="feature-category">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(categoryConfig).map(([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="feature-priority">Priority</Label>
+                    <Select
+                      value={newFeature.priority}
+                      onValueChange={(value: any) => setNewFeature({ ...newFeature, priority: value })}
+                    >
+                      <SelectTrigger id="feature-priority">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="critical">Critical</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="feature-date">Estimated Completion Date</Label>
+                  <Input
+                    id="feature-date"
+                    type="date"
+                    value={newFeature.estimatedDate}
+                    onChange={(e) => setNewFeature({ ...newFeature, estimatedDate: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="feature-notes">Notes</Label>
+                  <Textarea
+                    id="feature-notes"
+                    value={newFeature.notes}
+                    onChange={(e) => setNewFeature({ ...newFeature, notes: e.target.value })}
+                    placeholder="Additional notes or context..."
+                    rows={2}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={addFeature}>Add Feature</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <FunnelSimple size={20} weight="bold" className="text-muted-foreground" />
+          <span className="text-sm font-medium">Filters:</span>
+        </div>
+        <Select value={filterPriority} onValueChange={setFilterPriority}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="critical">Critical</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="in-progress">In Progress</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+        {(filterPriority !== 'all' || filterStatus !== 'all') && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setFilterPriority('all')
+              setFilterStatus('all')
+            }}
+          >
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-4 gap-4">
@@ -492,23 +706,89 @@ export default function ProductRoadmap() {
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-4">
-                                <label
-                                  htmlFor={feature.id}
-                                  className={`text-sm font-semibold cursor-pointer ${
-                                    feature.completed ? 'line-through text-muted-foreground' : ''
-                                  }`}
-                                >
-                                  {feature.name}
-                                </label>
-                                <Badge variant={priorityColors[feature.priority]}>
-                                  {feature.priority}
-                                </Badge>
+                                <div className="flex-1">
+                                  <label
+                                    htmlFor={feature.id}
+                                    className={`text-sm font-semibold cursor-pointer ${
+                                      feature.completed ? 'line-through text-muted-foreground' : ''
+                                    }`}
+                                  >
+                                    {feature.name}
+                                  </label>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant={priorityColors[feature.priority]}>
+                                      {feature.priority}
+                                    </Badge>
+                                    {feature.estimatedDate && (
+                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <CalendarBlank size={14} />
+                                        <span>Est: {new Date(feature.estimatedDate).toLocaleDateString()}</span>
+                                      </div>
+                                    )}
+                                    {feature.completedDate && (
+                                      <div className="flex items-center gap-1 text-xs text-green-600">
+                                        <CheckCircle size={14} weight="fill" />
+                                        <span>Done: {new Date(feature.completedDate).toLocaleDateString()}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              <p className={`text-sm mt-1 ${
+                              <p className={`text-sm mt-2 ${
                                 feature.completed ? 'text-muted-foreground line-through' : 'text-muted-foreground'
                               }`}>
                                 {feature.description}
                               </p>
+                              {feature.notes && (
+                                <div className="mt-2 p-2 bg-muted/50 rounded-md flex items-start gap-2">
+                                  <ChatCircleText size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  <p className="text-xs text-muted-foreground">{feature.notes}</p>
+                                </div>
+                              )}
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="mt-2 h-7 text-xs"
+                                    onClick={() => setEditingFeature(feature)}
+                                  >
+                                    <ChatCircleText size={14} className="mr-1" />
+                                    {feature.notes ? 'Edit Notes' : 'Add Notes'}
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Feature Notes</DialogTitle>
+                                    <DialogDescription>{feature.name}</DialogDescription>
+                                  </DialogHeader>
+                                  <div className="grid gap-4 py-4">
+                                    <Textarea
+                                      value={editingFeature?.id === feature.id ? editingFeature.notes || '' : feature.notes || ''}
+                                      onChange={(e) => {
+                                        if (editingFeature?.id === feature.id) {
+                                          setEditingFeature({ ...editingFeature, notes: e.target.value })
+                                        }
+                                      }}
+                                      placeholder="Add notes, context, or updates about this feature..."
+                                      rows={6}
+                                    />
+                                  </div>
+                                  <DialogFooter>
+                                    <Button
+                                      onClick={() => {
+                                        if (editingFeature) {
+                                          updateFeatureNotes(feature.id, editingFeature.notes || '')
+                                          setEditingFeature(null)
+                                          toast.success('Notes updated')
+                                        }
+                                      }}
+                                    >
+                                      Save Notes
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
                             </div>
                             {feature.completed ? (
                               <CheckCircle size={20} weight="fill" className="text-green-500 mt-1 flex-shrink-0" />
