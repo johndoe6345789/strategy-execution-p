@@ -14,7 +14,8 @@ import {
   Tree, 
   GridFour, 
   Circle,
-  House
+  House,
+  CaretDown
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -94,6 +95,7 @@ function App() {
   const [initiatives] = useKV<Initiative[]>('initiatives', [])
   const [activeView, setActiveView] = useState('strategy')
   const [showHome, setShowHome] = useState(true)
+  const [collapsedSections, setCollapsedSections] = useKV<string[]>('sidebar-collapsed-sections', [])
 
   const handleNavigate = (viewId: string) => {
     setActiveView(viewId)
@@ -102,6 +104,16 @@ function App() {
 
   const handleHomeClick = () => {
     setShowHome(true)
+  }
+
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections((current) => {
+      const sections = current || []
+      if (sections.includes(sectionId)) {
+        return sections.filter(id => id !== sectionId)
+      }
+      return [...sections, sectionId]
+    })
   }
 
   const activeItem = navigationSections
@@ -152,33 +164,52 @@ function App() {
               <span className="font-semibold text-sm">Home</span>
             </button>
 
-            {navigationSections.map(section => (
-              <div key={section.id} className="space-y-1">
-                <h3 className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  {section.label}
-                </h3>
-                <div className="space-y-1">
-                  {section.items.map(item => {
-                    const Icon = item.icon
-                    const isActive = activeView === item.id && !showHome
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleNavigate(item.id)}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-4 py-2.5 rounded-md transition-all text-left",
-                          "hover:bg-accent hover:text-accent-foreground",
-                          isActive && "bg-primary text-primary-foreground shadow-sm"
-                        )}
-                      >
-                        <Icon size={18} weight={isActive ? "fill" : "regular"} />
-                        <span className="font-medium text-sm">{item.label}</span>
-                      </button>
-                    )
-                  })}
+            {navigationSections.map(section => {
+              const isCollapsed = collapsedSections?.includes(section.id)
+              return (
+                <div key={section.id} className="space-y-1">
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50"
+                  >
+                    <span>{section.label}</span>
+                    <CaretDown 
+                      size={14} 
+                      weight="bold"
+                      className={cn(
+                        "transition-transform duration-200",
+                        isCollapsed && "-rotate-90"
+                      )}
+                    />
+                  </button>
+                  <div 
+                    className={cn(
+                      "space-y-1 overflow-hidden transition-all duration-200",
+                      isCollapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+                    )}
+                  >
+                    {section.items.map(item => {
+                      const Icon = item.icon
+                      const isActive = activeView === item.id && !showHome
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => handleNavigate(item.id)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-4 py-2.5 rounded-md transition-all text-left",
+                            "hover:bg-accent hover:text-accent-foreground",
+                            isActive && "bg-primary text-primary-foreground shadow-sm"
+                          )}
+                        >
+                          <Icon size={18} weight={isActive ? "fill" : "regular"} />
+                          <span className="font-medium text-sm">{item.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </nav>
         </aside>
 

@@ -123,7 +123,7 @@ Animations should reinforce the sense of **authoritative transitions and data re
 
 - **Components**: 
   - `Card` - Primary container for Strategy Cards, initiative summaries, and portfolio groups; add subtle shadow and border treatment for depth
-  - **Sidebar Navigation** - Hierarchical left sidebar with grouped sections (Planning, Execution, Hoshin Kanri, Roadmaps, Reporting) replacing horizontal tabs for better scalability and visual organization
+  - **Sidebar Navigation** - Hierarchical left sidebar with grouped sections (Planning, Execution, Hoshin Kanri, Roadmaps, Reporting) with collapsible/expandable sections for better space management and visual organization
   - `Dialog` - Full-screen modals for creating/editing Strategy Cards and initiatives with structured forms
   - `Table` - Initiative lists, KPI scorecards, and portfolio views with sortable columns and row hover states
   - `Badge` - Status indicators (On Track, At Risk, Blocked), priority levels, and portfolio tags with semantic colors
@@ -146,11 +146,13 @@ Animations should reinforce the sense of **authoritative transitions and data re
   - Buttons: Navy default → Gold hover → Pressed with slight scale → Disabled with reduced opacity
   - Cards: Subtle hover elevation; active state with gold left border; selected state with gold outline
   - **Sidebar Items**: Default state with regular icon weight → Hover with accent background → Active with filled icon, primary background and shadow
+  - **Sidebar Section Headers**: Clickable with caret icon → Hover with accent background → Collapsed state rotates caret 90° with smooth animation
   - Table rows: Hover with light slate background; selected with stronger slate background
   - Status badges: Green (On Track), Amber (At Risk), Red (Blocked), Gray (Not Started)
   
 - **Icon Selection**: 
   - `House` - Home dashboard navigation
+  - `CaretDown` - Collapsible section indicators in sidebar
   - `Strategy` - Use structured grid or layers icon for Strategy Cards
   - `ChartBar` - Workbench and execution tracking
   - `FolderOpen` - Portfolio management
@@ -171,7 +173,8 @@ Animations should reinforce the sense of **authoritative transitions and data re
   - Card padding: `p-6` for substantial internal space
   - Section gaps: `gap-6` between major sections; `gap-4` between related elements
   - List items: `py-3` for comfortable touch targets and scannability
-  - **Sidebar spacing**: `p-4` container padding; `space-y-6` between sections; `space-y-1` within sections
+  - **Sidebar spacing**: `p-4` container padding; `space-y-6` between sections; `space-y-1` within sections and for collapsible content
+  - **Sidebar section headers**: `py-2` for clickable area; smooth 200ms transition for collapse/expand animations
   
 - **Mobile**: 
   - Sidebar converts to collapsible drawer with hamburger menu
