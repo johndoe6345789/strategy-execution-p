@@ -123,7 +123,7 @@ Animations should reinforce the sense of **authoritative transitions and data re
 
 - **Components**: 
   - `Card` - Primary container for Strategy Cards, initiative summaries, and portfolio groups; add subtle shadow and border treatment for depth
-  - `Tabs` - Navigation between Strategy Cards and Workbench; styled with underline indicator and bold active state
+  - **Sidebar Navigation** - Hierarchical left sidebar with grouped sections (Planning, Execution, Hoshin Kanri, Roadmaps, Reporting) replacing horizontal tabs for better scalability and visual organization
   - `Dialog` - Full-screen modals for creating/editing Strategy Cards and initiatives with structured forms
   - `Table` - Initiative lists, KPI scorecards, and portfolio views with sortable columns and row hover states
   - `Badge` - Status indicators (On Track, At Risk, Blocked), priority levels, and portfolio tags with semantic colors
@@ -140,32 +140,42 @@ Animations should reinforce the sense of **authoritative transitions and data re
   - Portfolio capacity gauge combining Progress with numeric indicators
   - KPI scorecard component with trend indicators (up/down arrows) and target comparison
   - Initiative timeline component showing milestones and current progress
+  - **Home Dashboard** - Landing view with categorized module cards for intuitive entry into different functional areas
   
 - **States**: 
   - Buttons: Navy default → Gold hover → Pressed with slight scale → Disabled with reduced opacity
   - Cards: Subtle hover elevation; active state with gold left border; selected state with gold outline
+  - **Sidebar Items**: Default state with regular icon weight → Hover with accent background → Active with filled icon, primary background and shadow
   - Table rows: Hover with light slate background; selected with stronger slate background
   - Status badges: Green (On Track), Amber (At Risk), Red (Blocked), Gray (Not Started)
   
 - **Icon Selection**: 
+  - `House` - Home dashboard navigation
   - `Strategy` - Use structured grid or layers icon for Strategy Cards
   - `ChartBar` - Workbench and execution tracking
   - `FolderOpen` - Portfolio management
   - `Target` - Goals and KPIs
-  - `Link` - Traceability and connections
+  - `Tree` - Traceability and connections
   - `Plus` - Create new cards/initiatives
   - `ArrowRight` - Drill-down and navigation
   - `Warning` - Risk flags and capacity alerts
   - `TrendUp/TrendDown` - KPI performance indicators
+  - `ArrowsLeftRight` - Strategy comparison
+  - `GridFour` - X-Matrix
+  - `Circle` - Bowling chart
+  - `MapTrifold` - Strategic roadmap
+  - `Rocket` - Product roadmap
   
 - **Spacing**: 
   - Page margins: `p-8` for generous breathing room around main content
   - Card padding: `p-6` for substantial internal space
   - Section gaps: `gap-6` between major sections; `gap-4` between related elements
   - List items: `py-3` for comfortable touch targets and scannability
+  - **Sidebar spacing**: `p-4` container padding; `space-y-6` between sections; `space-y-1` within sections
   
 - **Mobile**: 
-  - Tab navigation converts to bottom sheet selector
+  - Sidebar converts to collapsible drawer with hamburger menu
+  - Home dashboard grid stacks to single column
   - Strategy Cards stack vertically with collapsible sections expanded one at a time
   - Tables transform to card-based lists with key data prioritized
   - Portfolio dashboard shows one metric card at a time with horizontal swipe

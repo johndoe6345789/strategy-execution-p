@@ -1,7 +1,22 @@
 import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Strategy, ChartBar, FolderOpen, Target, MapTrifold, Rocket, ChartLine, TrendUp, ArrowsLeftRight, Tree, GridFour, Circle } from '@phosphor-icons/react'
+import { Card, CardContent } from '@/components/ui/card'
+import { 
+  Strategy, 
+  ChartBar, 
+  FolderOpen, 
+  Target, 
+  MapTrifold, 
+  Rocket, 
+  ChartLine, 
+  TrendUp, 
+  ArrowsLeftRight, 
+  Tree, 
+  GridFour, 
+  Circle,
+  House
+} from '@phosphor-icons/react'
+import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
 import Workbench from './components/Workbench'
 import Portfolios from './components/Portfolios'
@@ -16,10 +31,84 @@ import XMatrix from './components/XMatrix'
 import BowlingChart from './components/BowlingChart'
 import type { StrategyCard, Initiative } from './types'
 
+type NavigationItem = {
+  id: string
+  label: string
+  icon: React.ElementType
+  component: React.ComponentType
+}
+
+type NavigationSection = {
+  id: string
+  label: string
+  items: NavigationItem[]
+}
+
+const navigationSections: NavigationSection[] = [
+  {
+    id: 'planning',
+    label: 'Planning',
+    items: [
+      { id: 'strategy', label: 'Strategy Cards', icon: Strategy, component: StrategyCards },
+      { id: 'comparison', label: 'Compare', icon: ArrowsLeftRight, component: StrategyComparison },
+      { id: 'traceability', label: 'Traceability', icon: Tree, component: StrategyTraceability },
+    ]
+  },
+  {
+    id: 'execution',
+    label: 'Execution',
+    items: [
+      { id: 'workbench', label: 'Workbench', icon: ChartBar, component: Workbench },
+      { id: 'tracker', label: 'Initiative Tracker', icon: TrendUp, component: InitiativeTracker },
+      { id: 'portfolios', label: 'Portfolios', icon: FolderOpen, component: Portfolios },
+    ]
+  },
+  {
+    id: 'hoshin',
+    label: 'Hoshin Kanri',
+    items: [
+      { id: 'x-matrix', label: 'X-Matrix', icon: GridFour, component: XMatrix },
+      { id: 'bowling', label: 'Bowling Chart', icon: Circle, component: BowlingChart },
+    ]
+  },
+  {
+    id: 'roadmaps',
+    label: 'Roadmaps',
+    items: [
+      { id: 'roadmap', label: 'Strategic Roadmap', icon: MapTrifold, component: Roadmap },
+      { id: 'product-roadmap', label: 'Product Roadmap', icon: Rocket, component: ProductRoadmap },
+    ]
+  },
+  {
+    id: 'reporting',
+    label: 'Reporting',
+    items: [
+      { id: 'dashboard', label: 'Executive Dashboard', icon: Target, component: Dashboard },
+      { id: 'kpi', label: 'KPI Scorecard', icon: ChartLine, component: KPIDashboard },
+    ]
+  }
+]
+
 function App() {
   const [strategyCards] = useKV<StrategyCard[]>('strategy-cards', [])
   const [initiatives] = useKV<Initiative[]>('initiatives', [])
-  const [activeTab, setActiveTab] = useState('strategy')
+  const [activeView, setActiveView] = useState('strategy')
+  const [showHome, setShowHome] = useState(true)
+
+  const handleNavigate = (viewId: string) => {
+    setActiveView(viewId)
+    setShowHome(false)
+  }
+
+  const handleHomeClick = () => {
+    setShowHome(true)
+  }
+
+  const activeItem = navigationSections
+    .flatMap(section => section.items)
+    .find(item => item.id === activeView)
+
+  const ActiveComponent = activeItem?.component
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,110 +137,128 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-12 mb-8 h-14 bg-muted/50">
-            <TabsTrigger value="strategy" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Strategy size={18} weight="bold" />
-              Strategy
-            </TabsTrigger>
-            <TabsTrigger value="comparison" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ArrowsLeftRight size={18} weight="bold" />
-              Compare
-            </TabsTrigger>
-            <TabsTrigger value="traceability" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Tree size={18} weight="bold" />
-              Trace
-            </TabsTrigger>
-            <TabsTrigger value="workbench" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ChartBar size={18} weight="bold" />
-              Workbench
-            </TabsTrigger>
-            <TabsTrigger value="tracker" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <TrendUp size={18} weight="bold" />
-              Tracker
-            </TabsTrigger>
-            <TabsTrigger value="kpi" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ChartLine size={18} weight="bold" />
-              KPIs
-            </TabsTrigger>
-            <TabsTrigger value="x-matrix" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <GridFour size={18} weight="bold" />
-              X-Matrix
-            </TabsTrigger>
-            <TabsTrigger value="bowling" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Circle size={18} weight="bold" />
-              Bowling
-            </TabsTrigger>
-            <TabsTrigger value="portfolios" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <FolderOpen size={18} weight="bold" />
-              Portfolios
-            </TabsTrigger>
-            <TabsTrigger value="dashboard" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Target size={18} weight="bold" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="roadmap" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <MapTrifold size={18} weight="bold" />
-              Roadmap
-            </TabsTrigger>
-            <TabsTrigger value="product-roadmap" className="gap-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Rocket size={18} weight="bold" />
-              Product
-            </TabsTrigger>
-          </TabsList>
+      <div className="flex min-h-[calc(100vh-104px)]">
+        <aside className="w-64 border-r border-border bg-card">
+          <nav className="p-4 space-y-6">
+            <button
+              onClick={handleHomeClick}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all",
+                "hover:bg-accent hover:text-accent-foreground",
+                showHome && "bg-primary text-primary-foreground shadow-sm"
+              )}
+            >
+              <House size={20} weight="bold" />
+              <span className="font-semibold text-sm">Home</span>
+            </button>
 
-          <TabsContent value="strategy" className="mt-0">
-            <StrategyCards />
-          </TabsContent>
+            {navigationSections.map(section => (
+              <div key={section.id} className="space-y-1">
+                <h3 className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  {section.label}
+                </h3>
+                <div className="space-y-1">
+                  {section.items.map(item => {
+                    const Icon = item.icon
+                    const isActive = activeView === item.id && !showHome
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleNavigate(item.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-2.5 rounded-md transition-all text-left",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          isActive && "bg-primary text-primary-foreground shadow-sm"
+                        )}
+                      >
+                        <Icon size={18} weight={isActive ? "fill" : "regular"} />
+                        <span className="font-medium text-sm">{item.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+        </aside>
 
-          <TabsContent value="comparison" className="mt-0">
-            <StrategyComparison />
-          </TabsContent>
+        <main className="flex-1 overflow-auto">
+          {showHome ? (
+            <div className="container mx-auto px-8 py-8">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  Welcome to StrategyOS
+                </h2>
+                <p className="text-muted-foreground">
+                  Select a module from the navigation to begin managing your strategic initiatives
+                </p>
+              </div>
 
-          <TabsContent value="traceability" className="mt-0">
-            <StrategyTraceability />
-          </TabsContent>
-
-          <TabsContent value="workbench" className="mt-0">
-            <Workbench />
-          </TabsContent>
-
-          <TabsContent value="tracker" className="mt-0">
-            <InitiativeTracker />
-          </TabsContent>
-
-          <TabsContent value="kpi" className="mt-0">
-            <KPIDashboard />
-          </TabsContent>
-
-          <TabsContent value="x-matrix" className="mt-0">
-            <XMatrix />
-          </TabsContent>
-
-          <TabsContent value="bowling" className="mt-0">
-            <BowlingChart />
-          </TabsContent>
-
-          <TabsContent value="portfolios" className="mt-0">
-            <Portfolios />
-          </TabsContent>
-
-          <TabsContent value="dashboard" className="mt-0">
-            <Dashboard />
-          </TabsContent>
-
-          <TabsContent value="roadmap" className="mt-0">
-            <Roadmap />
-          </TabsContent>
-
-          <TabsContent value="product-roadmap" className="mt-0">
-            <ProductRoadmap />
-          </TabsContent>
-        </Tabs>
-      </main>
+              <div className="grid gap-6">
+                {navigationSections.map(section => (
+                  <div key={section.id} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-foreground uppercase tracking-wide">
+                      {section.label}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {section.items.map(item => {
+                        const Icon = item.icon
+                        return (
+                          <Card
+                            key={item.id}
+                            className="cursor-pointer transition-all hover:shadow-lg hover:border-accent group"
+                            onClick={() => handleNavigate(item.id)}
+                          >
+                            <CardContent className="p-6">
+                              <div className="flex items-start gap-4">
+                                <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                                  <Icon size={24} weight="bold" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-foreground mb-1">
+                                    {item.label}
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {getModuleDescription(item.id)}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="container mx-auto px-8 py-8">
+              {ActiveComponent && <ActiveComponent />}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
+}
+
+function getModuleDescription(moduleId: string): string {
+  const descriptions: Record<string, string> = {
+    'strategy': 'Create and manage strategic frameworks using proven methodologies',
+    'comparison': 'Compare multiple strategic options side-by-side',
+    'traceability': 'Map relationships from goals to initiatives',
+    'workbench': 'Execute and track strategic initiatives',
+    'tracker': 'Monitor initiative progress with real-time status',
+    'portfolios': 'Organize initiatives into strategic portfolios',
+    'x-matrix': 'Align objectives using Hoshin Kanri methodology',
+    'bowling': 'Track monthly progress with visual indicators',
+    'roadmap': 'Visualize strategic timeline and milestones',
+    'product-roadmap': 'Plan and track product development initiatives',
+    'dashboard': 'Executive-level view of strategic performance',
+    'kpi': 'Monitor key performance indicators and metrics',
+  }
+  return descriptions[moduleId] || 'Manage your strategic initiatives'
 }
 
 export default App
