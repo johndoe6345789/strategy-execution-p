@@ -1,11 +1,12 @@
 import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Strategy, ChartBar, FolderOpen, Target } from '@phosphor-icons/react'
+import { Strategy, ChartBar, FolderOpen, Target, MapTrifold } from '@phosphor-icons/react'
 import StrategyCards from './components/StrategyCards'
 import Workbench from './components/Workbench'
 import Portfolios from './components/Portfolios'
 import Dashboard from './components/Dashboard'
+import Roadmap from './components/Roadmap'
 import type { StrategyCard, Initiative } from './types'
 
 function App() {
@@ -42,7 +43,7 @@ function App() {
 
       <main className="container mx-auto px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 h-14 bg-muted/50">
+          <TabsList className="grid w-full grid-cols-5 mb-8 h-14 bg-muted/50">
             <TabsTrigger value="strategy" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Strategy size={20} weight="bold" />
               Strategy Cards
@@ -58,6 +59,10 @@ function App() {
             <TabsTrigger value="dashboard" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Target size={20} weight="bold" />
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="roadmap" className="gap-2 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <MapTrifold size={20} weight="bold" />
+              Roadmap
             </TabsTrigger>
           </TabsList>
 
@@ -75,6 +80,10 @@ function App() {
 
           <TabsContent value="dashboard" className="mt-0">
             <Dashboard />
+          </TabsContent>
+
+          <TabsContent value="roadmap" className="mt-0">
+            <Roadmap />
           </TabsContent>
         </Tabs>
       </main>
