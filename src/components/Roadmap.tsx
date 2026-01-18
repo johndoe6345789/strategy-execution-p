@@ -2070,7 +2070,7 @@ export default function Roadmap() {
   const [projects, setProjects] = useKV<RoadmapProject[]>('roadmap-projects', [])
   const [hasInitialized, setHasInitialized] = useKV<boolean>('roadmap-initialized', false)
 
-  if (!hasInitialized && (!projects || projects.length === 0)) {
+  if (!projects || projects.length === 0) {
     const sampleProjects: RoadmapProject[] = [
       {
         id: 'proj-sample-1',
