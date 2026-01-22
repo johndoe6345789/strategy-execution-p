@@ -24,7 +24,10 @@ import {
   Gavel,
   Users,
   Presentation,
-  FileText
+  FileText,
+  ArrowsClockwise,
+  BookOpen,
+  Recycle
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -48,6 +51,10 @@ import PortfolioGovernance from './components/PortfolioGovernance'
 import CollaborativeWorkshops from './components/CollaborativeWorkshops'
 import CustomScorecard from './components/CustomScorecard'
 import AutomatedReportGeneration from './components/AutomatedReportGeneration'
+import PDCACycleTracking from './components/PDCACycleTracking'
+import CountermeasureManagement from './components/CountermeasureManagement'
+import RationaleDecisionCapture from './components/RationaleDecisionCapture'
+import LeanProcessSupport from './components/LeanProcessSupport'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -72,6 +79,7 @@ const navigationSections: NavigationSection[] = [
       { id: 'comparison', label: 'Compare', icon: ArrowsLeftRight, component: StrategyComparison },
       { id: 'traceability', label: 'Traceability', icon: Tree, component: StrategyTraceability },
       { id: 'strategy-to-initiative', label: 'Strategy to Initiative', icon: ArrowsDownUp, component: StrategyToInitiative },
+      { id: 'rationale-decisions', label: 'Decisions & Rationale', icon: BookOpen, component: RationaleDecisionCapture },
       { id: 'workshops', label: 'Collaborative Workshops', icon: Users, component: CollaborativeWorkshops },
     ]
   },
@@ -93,6 +101,15 @@ const navigationSections: NavigationSection[] = [
     items: [
       { id: 'x-matrix', label: 'X-Matrix', icon: GridFour, component: XMatrix },
       { id: 'bowling', label: 'Bowling Chart', icon: Circle, component: BowlingChart },
+    ]
+  },
+  {
+    id: 'opex',
+    label: 'Operational Excellence',
+    items: [
+      { id: 'lean-process', label: 'Lean Process Support', icon: Recycle, component: LeanProcessSupport },
+      { id: 'countermeasures', label: 'Countermeasure Management', icon: Target, component: CountermeasureManagement },
+      { id: 'pdca', label: 'PDCA Cycle Tracking', icon: ArrowsClockwise, component: PDCACycleTracking },
     ]
   },
   {
@@ -307,6 +324,7 @@ function getModuleDescription(moduleId: string): string {
     'comparison': 'Compare multiple strategic options side-by-side',
     'traceability': 'Map relationships from goals to initiatives',
     'strategy-to-initiative': 'AI-powered translation of strategy into executable initiatives',
+    'rationale-decisions': 'Capture strategic decisions, assumptions, and rationale',
     'workshops': 'Real-time collaboration and discussion on strategic initiatives',
     'workbench': 'Execute and track strategic initiatives',
     'tracker': 'Monitor initiative progress with real-time status',
@@ -316,6 +334,9 @@ function getModuleDescription(moduleId: string): string {
     'portfolio-governance': 'Decision framework for prioritization and resource allocation',
     'x-matrix': 'Align objectives using Hoshin Kanri methodology',
     'bowling': 'Track monthly progress with visual indicators',
+    'lean-process': 'Lean methodology principles, tools and templates',
+    'countermeasures': 'Track improvement actions beyond KPI reporting',
+    'pdca': 'Plan-Do-Check-Act continuous improvement cycles',
     'roadmap': 'Visualize strategic timeline and milestones',
     'product-roadmap': 'Plan and track product development initiatives',
     'executive-dashboard': 'Executive-level strategic performance overview',

@@ -63,7 +63,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Capture assumptions, rationale, and strategic decisions',
     category: 'strategy-cards',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive decision capture system allowing users to document strategic decisions with full rationale, alternatives considered, impact assessment, and categorization (strategic/tactical/operational). Features include decision linking to strategy cards, impact levels, detailed reasoning documentation, and visual decision history tracking.'
   },
   {
     id: 'sc-5',
@@ -267,7 +269,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Lean methodology tools and templates',
     category: 'opex',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Created comprehensive lean process support module featuring the 5 Lean Principles (Define Value, Map Value Stream, Create Flow, Establish Pull, Pursue Perfection), the 8 Wastes framework (DOWNTIME), and essential lean tools including 5S, Kaizen, Value Stream Mapping, Standard Work, JIT, Kanban, Poka-Yoke, and Gemba Walks. Includes detailed implementation steps and getting started guidance.'
   },
   {
     id: 'ox-2',
@@ -275,7 +279,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Track improvement actions, not just KPI reporting',
     category: 'opex',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built countermeasure management system for tracking improvement actions beyond metrics. Features include issue/problem capture, countermeasure action definition, owner assignment, due date tracking, status workflow (open/in-progress/completed), overdue tracking, and optional linking to initiatives for integrated improvement management.'
   },
   {
     id: 'ox-3',
@@ -283,7 +289,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Plan-Do-Check-Act continuous improvement cycles',
     category: 'opex',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented complete PDCA cycle tracking system supporting continuous improvement methodology. Features include phase-by-phase workflow (Plan-Do-Check-Act), progress tracking through each phase, notes and findings capture for each phase, category organization (quality/cost/delivery/safety/morale), linking to initiatives, owner assignment, and visual progress indicators showing cycle completion status.'
   },
   {
     id: 'ox-4',

@@ -2,6 +2,18 @@ export type StatusType = 'not-started' | 'on-track' | 'at-risk' | 'blocked' | 'c
 export type PriorityType = 'critical' | 'high' | 'medium' | 'low'
 export type PortfolioType = 'operational-excellence' | 'ma' | 'financial-transformation' | 'esg' | 'innovation'
 
+export interface Decision {
+  id: string
+  title: string
+  description: string
+  rationale: string
+  alternatives: string[]
+  decidedBy: string
+  decidedAt: string
+  impact: 'high' | 'medium' | 'low'
+  category: 'strategic' | 'tactical' | 'operational'
+}
+
 export interface StrategyCard {
   id: string
   title: string
@@ -10,6 +22,7 @@ export interface StrategyCard {
   goals: string[]
   metrics: string[]
   assumptions: string[]
+  decisions?: Decision[]
   createdAt: number
   updatedAt: number
 }
@@ -122,4 +135,28 @@ export interface MonthStatus {
   status: 'green' | 'yellow' | 'red' | 'not-started'
   actual: number
   target: number
+}
+
+export interface PDCACycle {
+  id: string
+  title: string
+  description: string
+  category: 'quality' | 'cost' | 'delivery' | 'safety' | 'morale'
+  currentPhase: 'plan' | 'do' | 'check' | 'act'
+  owner: string
+  startDate: string
+  plan: PDCAPhase
+  do: PDCAPhase
+  check: PDCAPhase
+  act: PDCAPhase
+  status: StatusType
+  linkedInitiativeId?: string
+}
+
+export interface PDCAPhase {
+  completed: boolean
+  completedDate?: string
+  notes: string
+  attachments?: string[]
+  findings?: string
 }
