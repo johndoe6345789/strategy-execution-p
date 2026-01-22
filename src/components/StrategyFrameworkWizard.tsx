@@ -1,573 +1,981 @@
+import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, ArrowRight, CheckCircle, Sparkle } from '@phosphor-icons/react'
+import { Badge } from '@/components/ui/badge'
+import { ArrowLeft, ArrowRight, CheckCircle, Sparkle, Target, TrendUp, Users, MapTrifold } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import type { StrategyCard } from '../types'
 
-interface FrameworkTemplate {
-  id: string
-  name: string
-  description: string
-  steps: Step[]
-  bestFor: string[]
-  estimatedTime: string
-}
-
-interface Step {
-  title: string
-  description: string
-  fields: Field[]
-  tips: string[]
-}
-
-interface Field {
-  name: string
-  label: string
-  type: 'text' | 'textarea' | 'list'
-  placeholder: string
-  required: boolean
-}
-
-const frameworkTemplates: FrameworkTemplate[] = [
+const frameworks = [
   {
     id: 'swot',
     name: 'SWOT Analysis',
-    description: 'Analyze your strengths, weaknesses, opportunities, and threats',
-    bestFor: ['Market analysis', 'Competitive positioning', 'Strategic assessment'],
-    estimatedTime: '15-20 minutes',
-    steps: [
-      {
-        title: 'Strategic Context',
-        description: 'Define what you\'re analyzing and why',
-        fields: [
-          { name: 'title', label: 'Strategy Title', type: 'text', placeholder: 'e.g., 2024 Market Expansion Strategy', required: true },
-          { name: 'vision', label: 'Vision Statement', type: 'textarea', placeholder: 'Where do you want to be in 3-5 years?', required: true },
-          { name: 'scope', label: 'Scope', type: 'text', placeholder: 'What boundaries define this strategy?', required: false }
-        ],
-        tips: [
-          'Be specific about what you\'re analyzing',
-          'Keep your vision aspirational but achievable',
-          'Consider your time horizon (1 year? 3 years? 5 years?)'
-        ]
-      },
-      {
-        title: 'Strengths',
-        description: 'What advantages do you have? What do you do well?',
-        fields: [
-          { name: 'strengths', label: 'Strengths', type: 'list', placeholder: 'Enter each strength on a new line...', required: true }
-        ],
-        tips: [
-          'Think about resources, capabilities, and competitive advantages',
-          'Consider your brand, technology, team, processes',
-          'What would customers say you\'re best at?'
-        ]
-      },
-      {
-        title: 'Weaknesses',
-        description: 'Where can you improve? What holds you back?',
-        fields: [
-          { name: 'weaknesses', label: 'Weaknesses', type: 'list', placeholder: 'Enter each weakness on a new line...', required: true }
-        ],
-        tips: [
-          'Be honest - this is for internal planning',
-          'Think about resource gaps, skill shortages, process inefficiencies',
-          'What do competitors do better than you?'
-        ]
-      },
-      {
-        title: 'Opportunities',
-        description: 'What external factors could you leverage for growth?',
-        fields: [
-          { name: 'opportunities', label: 'Opportunities', type: 'list', placeholder: 'Enter each opportunity on a new line...', required: true }
-        ],
-        tips: [
-          'Look at market trends, customer needs, technology shifts',
-          'Consider partnerships, new markets, product extensions',
-          'What changes in your industry create openings?'
-        ]
-      },
-      {
-        title: 'Threats',
-        description: 'What external challenges could harm your success?',
-        fields: [
-          { name: 'threats', label: 'Threats', type: 'list', placeholder: 'Enter each threat on a new line...', required: true }
-        ],
-        tips: [
-          'Think about competitors, regulations, economic factors',
-          'Consider technological disruption, changing customer preferences',
-          'What keeps you up at night?'
-        ]
-      },
-      {
-        title: 'Strategic Goals',
-        description: 'Based on your SWOT, what will you achieve?',
-        fields: [
-          { name: 'goals', label: 'Strategic Goals', type: 'list', placeholder: 'Enter each goal on a new line...', required: true },
-          { name: 'metrics', label: 'Success Metrics', type: 'list', placeholder: 'How will you measure success? One per line...', required: true }
-        ],
-        tips: [
-          'Goals should leverage strengths and opportunities',
-          'Goals should address weaknesses and threats',
-          'Make goals specific and measurable'
-        ]
-      },
-      {
-        title: 'Assumptions & Risks',
-        description: 'What are you betting on? What could go wrong?',
-        fields: [
-          { name: 'assumptions', label: 'Key Assumptions', type: 'list', placeholder: 'What must be true for this strategy to work?', required: false }
-        ],
-        tips: [
-          'List assumptions about market, customers, resources',
-          'Note dependencies on other teams or external factors',
-          'Identify early warning signs if assumptions prove wrong'
-        ]
-      }
-    ]
+    description: 'Analyze Strengths, Weaknesses, Opportunities, and Threats',
+    icon: Target,
+    color: 'bg-blue-500'
   },
   {
-    id: 'porters-five-forces',
-    name: 'Porter\'s Five Forces',
-    description: 'Analyze competitive forces shaping your industry',
-    bestFor: ['Industry analysis', 'Competitive strategy', 'Market entry decisions'],
-    estimatedTime: '20-30 minutes',
-    steps: [
-      {
-        title: 'Strategic Context',
-        description: 'Define your industry and competitive landscape',
-        fields: [
-          { name: 'title', label: 'Strategy Title', type: 'text', placeholder: 'e.g., Enterprise SaaS Competitive Strategy', required: true },
-          { name: 'vision', label: 'Vision Statement', type: 'textarea', placeholder: 'What position do you want to achieve?', required: true },
-          { name: 'industryDef', label: 'Industry Definition', type: 'text', placeholder: 'Define your industry boundaries', required: true }
-        ],
-        tips: [
-          'Be clear about which industry you\'re analyzing',
-          'Consider whether you\'re focused on a segment or the whole market'
-        ]
-      },
-      {
-        title: 'Competitive Rivalry',
-        description: 'How intense is competition among existing players?',
-        fields: [
-          { name: 'rivalry', label: 'Competitive Dynamics', type: 'list', placeholder: 'Describe competitive intensity and key rivals...', required: true }
-        ],
-        tips: [
-          'Consider number of competitors, growth rate, product differentiation',
-          'Think about price wars, marketing battles, innovation races',
-          'Assess switching costs and exit barriers'
-        ]
-      },
-      {
-        title: 'Threat of New Entrants',
-        description: 'How easy is it for new competitors to enter?',
-        fields: [
-          { name: 'newEntrants', label: 'Entry Barriers & Threats', type: 'list', placeholder: 'List barriers and potential new entrants...', required: true }
-        ],
-        tips: [
-          'Consider capital requirements, economies of scale, brand loyalty',
-          'Think about regulatory hurdles, access to distribution',
-          'Are there adjacent industries that could enter?'
-        ]
-      },
-      {
-        title: 'Bargaining Power of Suppliers',
-        description: 'How much power do suppliers have over you?',
-        fields: [
-          { name: 'suppliers', label: 'Supplier Dynamics', type: 'list', placeholder: 'Key suppliers and their leverage...', required: true }
-        ],
-        tips: [
-          'How many suppliers exist? How concentrated are they?',
-          'Can you easily switch suppliers?',
-          'Do suppliers have their own brands/channels?'
-        ]
-      },
-      {
-        title: 'Bargaining Power of Buyers',
-        description: 'How much power do customers have?',
-        fields: [
-          { name: 'buyers', label: 'Buyer Dynamics', type: 'list', placeholder: 'Customer concentration and power...', required: true }
-        ],
-        tips: [
-          'How price-sensitive are customers?',
-          'How much does your product matter to their business?',
-          'Can customers easily switch to competitors?'
-        ]
-      },
-      {
-        title: 'Threat of Substitutes',
-        description: 'What alternatives could replace your product/service?',
-        fields: [
-          { name: 'substitutes', label: 'Substitute Products', type: 'list', placeholder: 'List potential substitutes and alternatives...', required: true }
-        ],
-        tips: [
-          'Think broadly - substitutes don\'t have to be direct competitors',
-          'Consider different ways customers could solve their problem',
-          'Assess price-performance trade-offs of alternatives'
-        ]
-      },
-      {
-        title: 'Strategic Response',
-        description: 'How will you position yourself given these forces?',
-        fields: [
-          { name: 'goals', label: 'Strategic Goals', type: 'list', placeholder: 'Your strategic responses to competitive forces...', required: true },
-          { name: 'metrics', label: 'Success Metrics', type: 'list', placeholder: 'How will you measure competitive position?', required: true }
-        ],
-        tips: [
-          'Focus on forces where you can create advantage',
-          'Consider whether to compete head-on or find a niche',
-          'Think about how to shift forces in your favor'
-        ]
-      }
-    ]
+    id: 'porters',
+    name: "Porter's Five Forces",
+    description: 'Competitive analysis framework for industry assessment',
+    icon: TrendUp,
+    color: 'bg-purple-500'
   },
   {
     id: 'blue-ocean',
     name: 'Blue Ocean Strategy',
     description: 'Create uncontested market space through value innovation',
-    bestFor: ['New market creation', 'Differentiation strategy', 'Escaping competition'],
-    estimatedTime: '25-35 minutes',
-    steps: [
-      {
-        title: 'Strategic Context',
-        description: 'Define your current market and aspirations',
-        fields: [
-          { name: 'title', label: 'Strategy Title', type: 'text', placeholder: 'e.g., Value Innovation Initiative', required: true },
-          { name: 'vision', label: 'Vision Statement', type: 'textarea', placeholder: 'What uncontested market will you create?', required: true },
-          { name: 'currentMarket', label: 'Current Market (Red Ocean)', type: 'textarea', placeholder: 'Describe your current competitive battlefield', required: true }
-        ],
-        tips: [
-          'Be honest about the current state of competition',
-          'Think about where markets are oversaturated',
-          'Consider where you\'re fighting on price alone'
-        ]
-      },
-      {
-        title: 'Eliminate',
-        description: 'Which factors that the industry takes for granted should be eliminated?',
-        fields: [
-          { name: 'eliminate', label: 'Factors to Eliminate', type: 'list', placeholder: 'What can you remove that customers don\'t value?', required: true }
-        ],
-        tips: [
-          'Look for factors that add cost but little customer value',
-          'Challenge industry assumptions about "must-haves"',
-          'Be bold - elimination creates cost advantage'
-        ]
-      },
-      {
-        title: 'Reduce',
-        description: 'Which factors should be reduced well below industry standard?',
-        fields: [
-          { name: 'reduce', label: 'Factors to Reduce', type: 'list', placeholder: 'What can you offer less of than competitors?', required: true }
-        ],
-        tips: [
-          'Find areas where industry over-serves customers',
-          'Look for complexity that could be simplified',
-          'Consider features customers rarely use'
-        ]
-      },
-      {
-        title: 'Raise',
-        description: 'Which factors should be raised well above industry standard?',
-        fields: [
-          { name: 'raise', label: 'Factors to Raise', type: 'list', placeholder: 'Where will you significantly exceed competitors?', required: true }
-        ],
-        tips: [
-          'Focus on what customers truly value but don\'t get enough of',
-          'Think about eliminating pain points',
-          'Consider raising factors that competitors ignore'
-        ]
-      },
-      {
-        title: 'Create',
-        description: 'Which factors should be created that the industry has never offered?',
-        fields: [
-          { name: 'create', label: 'Factors to Create', type: 'list', placeholder: 'What new value can you unlock for customers?', required: true }
-        ],
-        tips: [
-          'Look for unmet needs in current solutions',
-          'Think about adjacent benefits customers would love',
-          'Consider what would make your offering irresistible'
-        ]
-      },
-      {
-        title: 'Value Proposition',
-        description: 'Articulate your new value proposition',
-        fields: [
-          { name: 'goals', label: 'Strategic Goals', type: 'list', placeholder: 'What will you achieve with this blue ocean?', required: true },
-          { name: 'metrics', label: 'Success Metrics', type: 'list', placeholder: 'How will you track your differentiation?', required: true }
-        ],
-        tips: [
-          'Your goals should reflect both differentiation AND low cost',
-          'Think about new customer segments you can reach',
-          'Consider metrics that show you\'re creating new demand'
-        ]
-      },
-      {
-        title: 'Implementation Risks',
-        description: 'What assumptions are you making?',
-        fields: [
-          { name: 'assumptions', label: 'Key Assumptions', type: 'list', placeholder: 'What must be true for this to work?', required: true }
-        ],
-        tips: [
-          'Test assumptions about what customers truly value',
-          'Consider whether you can deliver at the right price point',
-          'Think about how long before competitors copy you'
-        ]
-      }
-    ]
+    icon: MapTrifold,
+    color: 'bg-cyan-500'
+  },
+  {
+    id: 'custom',
+    name: 'Custom Strategy',
+    description: 'Create your own strategic framework from scratch',
+    icon: Sparkle,
+    color: 'bg-accent'
   }
 ]
 
-interface StrategyFrameworkWizardProps {
-  onComplete: (data: any) => void
-  onCancel: () => void
+interface WizardData {
+  framework: string
+  name: string
+  description: string
+  vision: string
+  goals: string[]
+  metrics: string[]
+  swot?: {
+    strengths: string[]
+    weaknesses: string[]
+    opportunities: string[]
+    threats: string[]
+  }
+  porters?: {
+    competitiveRivalry: string
+    supplierPower: string
+    buyerPower: string
+    threatOfSubstitution: string
+    threatOfNewEntry: string
+  }
+  blueOcean?: {
+    eliminate: string[]
+    reduce: string[]
+    raise: string[]
+    create: string[]
+  }
 }
 
-export default function StrategyFrameworkWizard({ onComplete, onCancel }: StrategyFrameworkWizardProps) {
-  const [selectedFramework, setSelectedFramework] = useState<string | null>(null)
+export default function StrategyFrameworkWizard() {
+  const [strategyCards, setStrategyCards] = useKV<StrategyCard[]>('strategy-cards', [])
   const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<Record<string, any>>({})
+  const [wizardData, setWizardData] = useState<WizardData>({
+    framework: '',
+    name: '',
+    description: '',
+    vision: '',
+    goals: ['', '', ''],
+    metrics: ['', '', ''],
+    swot: {
+      strengths: ['', ''],
+      weaknesses: ['', ''],
+      opportunities: ['', ''],
+      threats: ['', '']
+    },
+    porters: {
+      competitiveRivalry: '',
+      supplierPower: '',
+      buyerPower: '',
+      threatOfSubstitution: '',
+      threatOfNewEntry: ''
+    },
+    blueOcean: {
+      eliminate: ['', ''],
+      reduce: ['', ''],
+      raise: ['', ''],
+      create: ['', '']
+    }
+  })
 
-  const framework = frameworkTemplates.find(f => f.id === selectedFramework)
-  const progress = framework ? ((currentStep + 1) / (framework.steps.length + 1)) * 100 : 0
+  const steps = [
+    { title: 'Select Framework', description: 'Choose your strategic approach' },
+    { title: 'Basic Info', description: 'Name and describe your strategy' },
+    { title: 'Vision & Goals', description: 'Define your strategic direction' },
+    { title: 'Framework Details', description: 'Complete framework-specific analysis' },
+    { title: 'Metrics', description: 'Define success measurements' },
+    { title: 'Review', description: 'Review and create strategy' }
+  ]
 
-  const handleFieldChange = (fieldName: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldName]: value }))
+  const progress = ((currentStep + 1) / steps.length) * 100
+
+  const addArrayItem = (field: keyof WizardData, subField?: string) => {
+    if (subField && field in wizardData) {
+      const obj = wizardData[field] as any
+      setWizardData({
+        ...wizardData,
+        [field]: {
+          ...obj,
+          [subField]: [...obj[subField], '']
+        }
+      })
+    } else {
+      setWizardData({
+        ...wizardData,
+        [field]: [...(wizardData[field] as string[]), '']
+      })
+    }
   }
 
-  const validateCurrentStep = () => {
-    if (!framework) return false
-    const step = framework.steps[currentStep]
-    
-    for (const field of step.fields) {
-      if (field.required) {
-        const value = formData[field.name]
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
-          toast.error(`${field.label} is required`)
-          return false
+  const updateArrayItem = (field: keyof WizardData, index: number, value: string, subField?: string) => {
+    if (subField && field in wizardData) {
+      const obj = wizardData[field] as any
+      const updated = [...obj[subField]]
+      updated[index] = value
+      setWizardData({
+        ...wizardData,
+        [field]: {
+          ...obj,
+          [subField]: updated
         }
-      }
+      })
+    } else {
+      const updated = [...(wizardData[field] as string[])]
+      updated[index] = value
+      setWizardData({
+        ...wizardData,
+        [field]: updated
+      })
     }
+  }
+
+  const removeArrayItem = (field: keyof WizardData, index: number, subField?: string) => {
+    if (subField && field in wizardData) {
+      const obj = wizardData[field] as any
+      setWizardData({
+        ...wizardData,
+        [field]: {
+          ...obj,
+          [subField]: obj[subField].filter((_: any, i: number) => i !== index)
+        }
+      })
+    } else {
+      setWizardData({
+        ...wizardData,
+        [field]: (wizardData[field] as string[]).filter((_, i) => i !== index)
+      })
+    }
+  }
+
+  const canProceed = () => {
+    if (currentStep === 0) return wizardData.framework !== ''
+    if (currentStep === 1) return wizardData.name.trim() !== '' && wizardData.description.trim() !== ''
+    if (currentStep === 2) return wizardData.vision.trim() !== '' && wizardData.goals.some(g => g.trim() !== '')
     return true
   }
 
   const handleNext = () => {
-    if (!validateCurrentStep()) return
-    
-    if (framework && currentStep < framework.steps.length - 1) {
-      setCurrentStep(prev => prev + 1)
+    if (canProceed()) {
+      setCurrentStep(currentStep + 1)
     } else {
-      handleComplete()
+      toast.error('Please complete required fields')
     }
   }
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1)
-    } else {
-      setSelectedFramework(null)
-      setFormData({})
-    }
+    setCurrentStep(currentStep - 1)
   }
 
-  const handleComplete = () => {
-    const strategyData = {
-      framework: selectedFramework,
-      frameworkName: framework?.name,
-      ...formData,
-      goals: formData.goals?.split('\n').filter((g: string) => g.trim()) || [],
-      metrics: formData.metrics?.split('\n').filter((m: string) => m.trim()) || [],
-      assumptions: formData.assumptions?.split('\n').filter((a: string) => a.trim()) || []
+  const handleComplete = async () => {
+    const frameworkName = wizardData.framework === 'custom' ? 'Custom Framework' : frameworks.find(f => f.id === wizardData.framework)?.name || 'Custom'
+    
+    const assumptions: string[] = []
+    
+    if (wizardData.framework === 'swot' && wizardData.swot) {
+      const strengths = wizardData.swot.strengths.filter(s => s.trim() !== '')
+      const weaknesses = wizardData.swot.weaknesses.filter(w => w.trim() !== '')
+      const opportunities = wizardData.swot.opportunities.filter(o => o.trim() !== '')
+      const threats = wizardData.swot.threats.filter(t => t.trim() !== '')
+      
+      if (strengths.length) assumptions.push(`Strengths: ${strengths.join(', ')}`)
+      if (weaknesses.length) assumptions.push(`Weaknesses: ${weaknesses.join(', ')}`)
+      if (opportunities.length) assumptions.push(`Opportunities: ${opportunities.join(', ')}`)
+      if (threats.length) assumptions.push(`Threats: ${threats.join(', ')}`)
+    } else if (wizardData.framework === 'porters' && wizardData.porters) {
+      if (wizardData.porters.competitiveRivalry) assumptions.push(`Competitive Rivalry: ${wizardData.porters.competitiveRivalry}`)
+      if (wizardData.porters.supplierPower) assumptions.push(`Supplier Power: ${wizardData.porters.supplierPower}`)
+      if (wizardData.porters.buyerPower) assumptions.push(`Buyer Power: ${wizardData.porters.buyerPower}`)
+      if (wizardData.porters.threatOfSubstitution) assumptions.push(`Threat of Substitution: ${wizardData.porters.threatOfSubstitution}`)
+      if (wizardData.porters.threatOfNewEntry) assumptions.push(`Threat of New Entry: ${wizardData.porters.threatOfNewEntry}`)
+    } else if (wizardData.framework === 'blue-ocean' && wizardData.blueOcean) {
+      const eliminate = wizardData.blueOcean.eliminate.filter(e => e.trim() !== '')
+      const reduce = wizardData.blueOcean.reduce.filter(r => r.trim() !== '')
+      const raise = wizardData.blueOcean.raise.filter(r => r.trim() !== '')
+      const create = wizardData.blueOcean.create.filter(c => c.trim() !== '')
+      
+      if (eliminate.length) assumptions.push(`Eliminate: ${eliminate.join(', ')}`)
+      if (reduce.length) assumptions.push(`Reduce: ${reduce.join(', ')}`)
+      if (raise.length) assumptions.push(`Raise: ${raise.join(', ')}`)
+      if (create.length) assumptions.push(`Create: ${create.join(', ')}`)
     }
-    onComplete(strategyData)
-    toast.success('Strategy Card created successfully!')
+
+    const newStrategy: StrategyCard = {
+      id: `strategy-${Date.now()}`,
+      title: wizardData.name,
+      framework: frameworkName,
+      vision: wizardData.vision,
+      goals: wizardData.goals.filter(g => g.trim() !== ''),
+      metrics: wizardData.metrics.filter(m => m.trim() !== ''),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      assumptions
+    }
+
+    setStrategyCards((current) => [...(current || []), newStrategy])
+    toast.success('Strategy created successfully!')
+    
+    setWizardData({
+      framework: '',
+      name: '',
+      description: '',
+      vision: '',
+      goals: ['', '', ''],
+      metrics: ['', '', ''],
+      swot: {
+        strengths: ['', ''],
+        weaknesses: ['', ''],
+        opportunities: ['', ''],
+        threats: ['', '']
+      },
+      porters: {
+        competitiveRivalry: '',
+        supplierPower: '',
+        buyerPower: '',
+        threatOfSubstitution: '',
+        threatOfNewEntry: ''
+      },
+      blueOcean: {
+        eliminate: ['', ''],
+        reduce: ['', ''],
+        raise: ['', ''],
+        create: ['', '']
+      }
+    })
+    setCurrentStep(0)
   }
 
-  if (!selectedFramework) {
-    return (
-      <div className="space-y-6 p-6">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight">Choose a Strategic Framework</h2>
-          <p className="text-muted-foreground">
-            Select a proven framework to guide your strategic planning process
-          </p>
-        </div>
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Choose a Strategic Framework</h3>
+              <p className="text-sm text-muted-foreground">
+                Select a proven framework to guide your strategy development
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {frameworks.map((framework) => {
+                const Icon = framework.icon
+                return (
+                  <Card
+                    key={framework.id}
+                    className={`cursor-pointer transition-all hover:shadow-lg ${
+                      wizardData.framework === framework.id ? 'border-accent border-2' : ''
+                    }`}
+                    onClick={() => setWizardData({ ...wizardData, framework: framework.id })}
+                  >
+                    <CardHeader>
+                      <div className="flex items-start gap-3">
+                        <div className={`${framework.color} p-3 rounded-lg`}>
+                          <Icon size={24} weight="bold" className="text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-base">{framework.name}</CardTitle>
+                          <CardDescription className="text-xs mt-1">
+                            {framework.description}
+                          </CardDescription>
+                        </div>
+                        {wizardData.framework === framework.id && (
+                          <CheckCircle size={24} weight="fill" className="text-accent" />
+                        )}
+                      </div>
+                    </CardHeader>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
+        )
 
-        <div className="grid gap-4">
-          {frameworkTemplates.map((template) => (
-            <Card 
-              key={template.id}
-              className="cursor-pointer hover:border-accent transition-all hover:shadow-md"
-              onClick={() => setSelectedFramework(template.id)}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-2 flex items-center gap-2">
-                      <Sparkle size={20} weight="fill" className="text-accent" />
-                      {template.name}
-                    </CardTitle>
-                    <CardDescription className="text-sm">{template.description}</CardDescription>
-                  </div>
-                  <Badge variant="secondary" className="font-mono text-xs">
-                    {template.estimatedTime}
-                  </Badge>
+      case 1:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Basic Strategy Information</h3>
+              <p className="text-sm text-muted-foreground">
+                Give your strategy a clear name and description
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="strategy-name">Strategy Name *</Label>
+                <Input
+                  id="strategy-name"
+                  value={wizardData.name}
+                  onChange={(e) => setWizardData({ ...wizardData, name: e.target.value })}
+                  placeholder="e.g., Digital Transformation 2025"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="strategy-description">Description *</Label>
+                <Textarea
+                  id="strategy-description"
+                  value={wizardData.description}
+                  onChange={(e) => setWizardData({ ...wizardData, description: e.target.value })}
+                  placeholder="Describe the purpose and scope of this strategy..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+        )
+
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Vision & Strategic Goals</h3>
+              <p className="text-sm text-muted-foreground">
+                Define your long-term vision and key goals
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="vision">Vision Statement *</Label>
+                <Textarea
+                  id="vision"
+                  value={wizardData.vision}
+                  onChange={(e) => setWizardData({ ...wizardData, vision: e.target.value })}
+                  placeholder="Where do you want to be in 3-5 years?"
+                  rows={3}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label>Strategic Goals</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => addArrayItem('goals')}
+                  >
+                    + Add Goal
+                  </Button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+                {wizardData.goals.map((goal, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={goal}
+                      onChange={(e) => updateArrayItem('goals', index, e.target.value)}
+                      placeholder={`Goal ${index + 1}`}
+                    />
+                    {wizardData.goals.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeArrayItem('goals', index)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+
+      case 3:
+        if (wizardData.framework === 'swot') {
+          return (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">SWOT Analysis</h3>
+                <p className="text-sm text-muted-foreground">
+                  Analyze your internal strengths & weaknesses, and external opportunities & threats
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Strengths (Internal, Positive)</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.swot?.strengths.map((strength, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={strength}
+                          onChange={(e) => updateArrayItem('swot', index, e.target.value, 'strengths')}
+                          placeholder={`Strength ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.swot?.strengths.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('swot', index, 'strengths')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('swot', 'strengths')}
+                      className="w-full"
+                    >
+                      + Add Strength
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Weaknesses (Internal, Negative)</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.swot?.weaknesses.map((weakness, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={weakness}
+                          onChange={(e) => updateArrayItem('swot', index, e.target.value, 'weaknesses')}
+                          placeholder={`Weakness ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.swot?.weaknesses.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('swot', index, 'weaknesses')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('swot', 'weaknesses')}
+                      className="w-full"
+                    >
+                      + Add Weakness
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Opportunities (External, Positive)</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.swot?.opportunities.map((opportunity, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={opportunity}
+                          onChange={(e) => updateArrayItem('swot', index, e.target.value, 'opportunities')}
+                          placeholder={`Opportunity ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.swot?.opportunities.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('swot', index, 'opportunities')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('swot', 'opportunities')}
+                      className="w-full"
+                    >
+                      + Add Opportunity
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Threats (External, Negative)</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.swot?.threats.map((threat, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={threat}
+                          onChange={(e) => updateArrayItem('swot', index, e.target.value, 'threats')}
+                          placeholder={`Threat ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.swot?.threats.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('swot', index, 'threats')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('swot', 'threats')}
+                      className="w-full"
+                    >
+                      + Add Threat
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )
+        } else if (wizardData.framework === 'porters') {
+          return (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Porter's Five Forces Analysis</h3>
+                <p className="text-sm text-muted-foreground">
+                  Assess competitive forces shaping your industry
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="grid gap-2">
+                  <Label>Competitive Rivalry</Label>
+                  <Textarea
+                    value={wizardData.porters?.competitiveRivalry || ''}
+                    onChange={(e) => setWizardData({
+                      ...wizardData,
+                      porters: { ...wizardData.porters!, competitiveRivalry: e.target.value }
+                    })}
+                    placeholder="Assess the intensity of competition among existing competitors..."
+                    rows={2}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Supplier Power</Label>
+                  <Textarea
+                    value={wizardData.porters?.supplierPower || ''}
+                    onChange={(e) => setWizardData({
+                      ...wizardData,
+                      porters: { ...wizardData.porters!, supplierPower: e.target.value }
+                    })}
+                    placeholder="How much power do suppliers have to drive up prices?..."
+                    rows={2}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Buyer Power</Label>
+                  <Textarea
+                    value={wizardData.porters?.buyerPower || ''}
+                    onChange={(e) => setWizardData({
+                      ...wizardData,
+                      porters: { ...wizardData.porters!, buyerPower: e.target.value }
+                    })}
+                    placeholder="How much power do customers have to drive prices down?..."
+                    rows={2}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Threat of Substitution</Label>
+                  <Textarea
+                    value={wizardData.porters?.threatOfSubstitution || ''}
+                    onChange={(e) => setWizardData({
+                      ...wizardData,
+                      porters: { ...wizardData.porters!, threatOfSubstitution: e.target.value }
+                    })}
+                    placeholder="How easy is it for customers to find alternatives?..."
+                    rows={2}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Threat of New Entry</Label>
+                  <Textarea
+                    value={wizardData.porters?.threatOfNewEntry || ''}
+                    onChange={(e) => setWizardData({
+                      ...wizardData,
+                      porters: { ...wizardData.porters!, threatOfNewEntry: e.target.value }
+                    })}
+                    placeholder="How easy is it for new competitors to enter the market?..."
+                    rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+          )
+        } else if (wizardData.framework === 'blue-ocean') {
+          return (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Blue Ocean Strategy Canvas</h3>
+                <p className="text-sm text-muted-foreground">
+                  Identify factors to eliminate, reduce, raise, and create
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="border-destructive/50">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-destructive">Eliminate</CardTitle>
+                    <CardDescription className="text-xs">What factors should be eliminated?</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.blueOcean?.eliminate.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item}
+                          onChange={(e) => updateArrayItem('blueOcean', index, e.target.value, 'eliminate')}
+                          placeholder={`Factor ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.blueOcean?.eliminate.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('blueOcean', index, 'eliminate')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('blueOcean', 'eliminate')}
+                      className="w-full"
+                    >
+                      + Add Factor
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-orange-500/50">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-orange-600">Reduce</CardTitle>
+                    <CardDescription className="text-xs">What should be reduced below standard?</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.blueOcean?.reduce.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item}
+                          onChange={(e) => updateArrayItem('blueOcean', index, e.target.value, 'reduce')}
+                          placeholder={`Factor ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.blueOcean?.reduce.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('blueOcean', index, 'reduce')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('blueOcean', 'reduce')}
+                      className="w-full"
+                    >
+                      + Add Factor
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-blue-500/50">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-blue-600">Raise</CardTitle>
+                    <CardDescription className="text-xs">What should be raised above standard?</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.blueOcean?.raise.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item}
+                          onChange={(e) => updateArrayItem('blueOcean', index, e.target.value, 'raise')}
+                          placeholder={`Factor ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.blueOcean?.raise.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('blueOcean', index, 'raise')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('blueOcean', 'raise')}
+                      className="w-full"
+                    >
+                      + Add Factor
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-green-500/50">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-green-600">Create</CardTitle>
+                    <CardDescription className="text-xs">What should be created?</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {wizardData.blueOcean?.create.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item}
+                          onChange={(e) => updateArrayItem('blueOcean', index, e.target.value, 'create')}
+                          placeholder={`Factor ${index + 1}`}
+                          className="text-sm"
+                        />
+                        {(wizardData.blueOcean?.create.length || 0) > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeArrayItem('blueOcean', index, 'create')}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('blueOcean', 'create')}
+                      className="w-full"
+                    >
+                      + Add Factor
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )
+        } else {
+          return (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Custom Strategy Details</h3>
+                <p className="text-sm text-muted-foreground">
+                  Add any additional analysis or context for your custom framework
+                </p>
+              </div>
+              <div className="grid gap-2">
+                <Label>Additional Context (Optional)</Label>
+                <Textarea
+                  placeholder="Add any relevant analysis, market research, or strategic context..."
+                  rows={8}
+                />
+              </div>
+            </div>
+          )
+        }
+
+      case 4:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Success Metrics</h3>
+              <p className="text-sm text-muted-foreground">
+                Define how you'll measure the success of this strategy
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label>Key Metrics</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => addArrayItem('metrics')}
+                >
+                  + Add Metric
+                </Button>
+              </div>
+              {wizardData.metrics.map((metric, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    value={metric}
+                    onChange={(e) => updateArrayItem('metrics', index, e.target.value)}
+                    placeholder={`e.g., Revenue growth of 25% YoY`}
+                  />
+                  {wizardData.metrics.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeArrayItem('metrics', index)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+
+      case 5:
+        const selectedFramework = frameworks.find(f => f.id === wizardData.framework)
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Review Your Strategy</h3>
+              <p className="text-sm text-muted-foreground">
+                Review all details before creating your strategy card
+              </p>
+            </div>
+            <div className="space-y-3">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Badge>{selectedFramework?.name}</Badge>
+                    <CardTitle className="text-base">{wizardData.name}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                      Best For:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {template.bestFor.map((item, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {item}
-                        </Badge>
+                    <Label className="text-xs text-muted-foreground">Description</Label>
+                    <p className="text-sm mt-1">{wizardData.description}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Vision</Label>
+                    <p className="text-sm mt-1">{wizardData.vision}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Goals</Label>
+                    <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                      {wizardData.goals.filter(g => g.trim() !== '').map((goal, i) => (
+                        <li key={i}>{goal}</li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{template.steps.length} guided steps</span>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Metrics</Label>
+                    <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                      {wizardData.metrics.filter(m => m.trim() !== '').map((metric, i) => (
+                        <li key={i}>{metric}</li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )
 
-        <div className="flex justify-end pt-4 border-t">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    )
+      default:
+        return null
+    }
   }
-
-  if (!framework) return null
-
-  const step = framework.steps[currentStep]
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">{framework.name}</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Step {currentStep + 1} of {framework.steps.length}: {step.title}
-            </p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Guided Strategy Creation</h2>
+        <p className="text-muted-foreground mt-2">
+          Step-by-step wizard to create comprehensive strategy cards
+        </p>
+      </div>
+
+      <Card className="border-2">
+        <CardHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{steps[currentStep].title}</CardTitle>
+                <CardDescription>{steps[currentStep].description}</CardDescription>
+              </div>
+              <Badge variant="secondary">
+                Step {currentStep + 1} of {steps.length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Progress</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
           </div>
-          <Badge variant="secondary" className="font-mono">
-            {Math.round(progress)}% Complete
-          </Badge>
+        </CardHeader>
+        <CardContent className="min-h-[400px]">
+          {renderStep()}
+        </CardContent>
+        <div className="px-6 py-4 border-t flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 0}
+            className="gap-2"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
+          <div className="flex gap-2">
+            {currentStep < steps.length - 1 ? (
+              <Button onClick={handleNext} disabled={!canProceed()} className="gap-2">
+                Next
+                <ArrowRight size={16} />
+              </Button>
+            ) : (
+              <Button onClick={handleComplete} className="gap-2">
+                <CheckCircle size={16} weight="bold" />
+                Create Strategy
+              </Button>
+            )}
+          </div>
         </div>
-        <Progress value={progress} className="h-2" />
-      </div>
-
-      <Separator />
-
-      <div className="space-y-6">
-        <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
-          <p className="text-sm font-medium mb-2">{step.description}</p>
-          {step.tips.length > 0 && (
-            <div className="space-y-1 mt-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Tips:
-              </p>
-              <ul className="space-y-1">
-                {step.tips.map((tip, idx) => (
-                  <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
-                    <span className="text-accent mt-0.5">•</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          {step.fields.map((field) => (
-            <div key={field.name} className="space-y-2">
-              <Label htmlFor={field.name} className="flex items-center gap-2">
-                {field.label}
-                {field.required && <span className="text-destructive">*</span>}
-              </Label>
-              
-              {field.type === 'text' && (
-                <Input
-                  id={field.name}
-                  value={formData[field.name] || ''}
-                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                  placeholder={field.placeholder}
-                  className="font-medium"
-                />
-              )}
-              
-              {field.type === 'textarea' && (
-                <Textarea
-                  id={field.name}
-                  value={formData[field.name] || ''}
-                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                  placeholder={field.placeholder}
-                  rows={4}
-                  className="font-medium"
-                />
-              )}
-              
-              {field.type === 'list' && (
-                <Textarea
-                  id={field.name}
-                  value={formData[field.name] || ''}
-                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                  placeholder={field.placeholder}
-                  rows={6}
-                  className="font-medium font-mono text-sm"
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="flex items-center justify-between pt-4">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          className="gap-2"
-        >
-          <ArrowLeft size={16} weight="bold" />
-          {currentStep === 0 ? 'Change Framework' : 'Previous'}
-        </Button>
-        
-        <Button
-          onClick={handleNext}
-          className="gap-2 bg-accent hover:bg-accent/90"
-        >
-          {currentStep === framework.steps.length - 1 ? (
-            <>
-              <CheckCircle size={16} weight="bold" />
-              Complete Strategy
-            </>
-          ) : (
-            <>
-              Next Step
-              <ArrowRight size={16} weight="bold" />
-            </>
-          )}
-        </Button>
-      </div>
+      </Card>
     </div>
   )
 }

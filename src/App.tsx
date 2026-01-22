@@ -27,7 +27,9 @@ import {
   FileText,
   ArrowsClockwise,
   BookOpen,
-  Recycle
+  Recycle,
+  Sparkle,
+  GlobeHemisphereWest
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -55,6 +57,9 @@ import PDCACycleTracking from './components/PDCACycleTracking'
 import CountermeasureManagement from './components/CountermeasureManagement'
 import RationaleDecisionCapture from './components/RationaleDecisionCapture'
 import LeanProcessSupport from './components/LeanProcessSupport'
+import StrategyFrameworkWizard from './components/StrategyFrameworkWizard'
+import DrillDownReporting from './components/DrillDownReporting'
+import MultiRegionReporting from './components/MultiRegionReporting'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -76,6 +81,7 @@ const navigationSections: NavigationSection[] = [
     label: 'Planning',
     items: [
       { id: 'strategy', label: 'Strategy Cards', icon: Strategy, component: StrategyCards },
+      { id: 'guided-strategy', label: 'Guided Strategy Creation', icon: Sparkle, component: StrategyFrameworkWizard },
       { id: 'comparison', label: 'Compare', icon: ArrowsLeftRight, component: StrategyComparison },
       { id: 'traceability', label: 'Traceability', icon: Tree, component: StrategyTraceability },
       { id: 'strategy-to-initiative', label: 'Strategy to Initiative', icon: ArrowsDownUp, component: StrategyToInitiative },
@@ -110,6 +116,7 @@ const navigationSections: NavigationSection[] = [
       { id: 'lean-process', label: 'Lean Process Support', icon: Recycle, component: LeanProcessSupport },
       { id: 'countermeasures', label: 'Countermeasure Management', icon: Target, component: CountermeasureManagement },
       { id: 'pdca', label: 'PDCA Cycle Tracking', icon: ArrowsClockwise, component: PDCACycleTracking },
+      { id: 'multi-region', label: 'Multi-Region Reporting', icon: GlobeHemisphereWest, component: MultiRegionReporting },
     ]
   },
   {
@@ -125,6 +132,7 @@ const navigationSections: NavigationSection[] = [
     label: 'Reporting',
     items: [
       { id: 'executive-dashboard', label: 'Executive Dashboard', icon: ChartLineUp, component: ExecutiveDashboard },
+      { id: 'drill-down', label: 'Drill-Down Reporting', icon: ChartBar, component: DrillDownReporting },
       { id: 'dashboard', label: 'Performance Dashboard', icon: Target, component: Dashboard },
       { id: 'kpi', label: 'KPI Scorecard', icon: ChartLine, component: KPIDashboard },
       { id: 'custom-scorecard', label: 'Custom Scorecards', icon: Presentation, component: CustomScorecard },
@@ -321,6 +329,7 @@ function App() {
 function getModuleDescription(moduleId: string): string {
   const descriptions: Record<string, string> = {
     'strategy': 'Create and manage strategic frameworks using proven methodologies',
+    'guided-strategy': 'Step-by-step wizard for comprehensive strategy formulation',
     'comparison': 'Compare multiple strategic options side-by-side',
     'traceability': 'Map relationships from goals to initiatives',
     'strategy-to-initiative': 'AI-powered translation of strategy into executable initiatives',
@@ -337,9 +346,11 @@ function getModuleDescription(moduleId: string): string {
     'lean-process': 'Lean methodology principles, tools and templates',
     'countermeasures': 'Track improvement actions beyond KPI reporting',
     'pdca': 'Plan-Do-Check-Act continuous improvement cycles',
+    'multi-region': 'Consistent reporting and analytics across global units',
     'roadmap': 'Visualize strategic timeline and milestones',
     'product-roadmap': 'Plan and track product development initiatives',
     'executive-dashboard': 'Executive-level strategic performance overview',
+    'drill-down': 'Navigate from enterprise level to detailed project information',
     'dashboard': 'Real-time performance metrics and insights',
     'kpi': 'Monitor key performance indicators and metrics',
     'custom-scorecard': 'Create and manage configurable performance scorecards',

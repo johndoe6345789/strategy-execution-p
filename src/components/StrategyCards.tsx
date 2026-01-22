@@ -10,9 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, Target, Lightbulb, ChartLineUp, Sparkle, Lightning } from '@phosphor-icons/react'
+import { Plus, Target, Lightbulb, ChartLineUp } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import StrategyFrameworkWizard from './StrategyFrameworkWizard'
 import type { StrategyCard } from '@/types'
 
 const frameworks = [
@@ -26,9 +25,7 @@ const frameworks = [
 export default function StrategyCards() {
   const [strategyCards, setStrategyCards] = useKV<StrategyCard[]>('strategy-cards', [])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [selectedCard, setSelectedCard] = useState<StrategyCard | null>(null)
-  const [creationMode, setCreationMode] = useState<'guided' | 'manual'>('guided')
 
   const [formData, setFormData] = useState({
     title: '',
@@ -78,23 +75,6 @@ export default function StrategyCards() {
     setSelectedCard(card)
   }
 
-  const handleWizardComplete = (wizardData: any) => {
-    const newCard: StrategyCard = {
-      id: `card-${Date.now()}`,
-      title: wizardData.title,
-      framework: wizardData.framework,
-      vision: wizardData.vision,
-      goals: Array.isArray(wizardData.goals) ? wizardData.goals : [],
-      metrics: Array.isArray(wizardData.metrics) ? wizardData.metrics : [],
-      assumptions: Array.isArray(wizardData.assumptions) ? wizardData.assumptions : [],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    }
-
-    setStrategyCards((current) => [...(current || []), newCard])
-    setIsWizardOpen(false)
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -103,26 +83,11 @@ export default function StrategyCards() {
           <p className="text-muted-foreground mt-1">Create and manage strategic frameworks</p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={isWizardOpen} onOpenChange={setIsWizardOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 bg-accent hover:bg-accent/90 transition-colors">
-                <Sparkle size={18} weight="fill" />
-                Guided Wizard
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[95vh] p-0">
-              <StrategyFrameworkWizard 
-                onComplete={handleWizardComplete}
-                onCancel={() => setIsWizardOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-          
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Lightning size={18} weight="bold" />
-                Quick Create
+              <Button className="gap-2">
+                <Plus size={18} weight="bold" />
+                Create Strategy Card
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh]">
@@ -229,16 +194,10 @@ export default function StrategyCards() {
             <p className="text-muted-foreground text-center max-w-md mb-6">
               Start by creating your first strategy card using a proven framework
             </p>
-            <div className="flex gap-2">
-              <Button onClick={() => setIsWizardOpen(true)} className="gap-2 bg-accent hover:bg-accent/90">
-                <Sparkle size={18} weight="fill" />
-                Guided Wizard
-              </Button>
-              <Button onClick={() => setIsDialogOpen(true)} variant="outline" className="gap-2">
-                <Lightning size={18} weight="bold" />
-                Quick Create
-              </Button>
-            </div>
+            <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
+              <Plus size={18} weight="bold" />
+              Create Strategy Card
+            </Button>
           </CardContent>
         </Card>
       ) : (
