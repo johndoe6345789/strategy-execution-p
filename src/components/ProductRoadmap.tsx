@@ -77,7 +77,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Convert strategic objectives into initiatives and projects',
     category: 'workbench',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive Strategy-to-Initiative translation module with AI-powered suggestion engine. Users can select any strategy card and receive intelligent recommendations for executable initiatives complete with rationale, priority, and portfolio assignments. Features visual tracking of strategy completion rates and seamless initiative creation workflow.'
   },
   {
     id: 'wb-2',
@@ -85,7 +87,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Full Hoshin Kanri methodology implementation',
     category: 'workbench',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Comprehensive Hoshin Kanri implementation complete with Strategic Roadmap module supporting projects, objectives (breakthrough/annual/improvement), metrics tracking, bowling chart visualization, X-Matrix alignment, countermeasure management (PDCA cycle), and executive dashboard. Full end-to-end workflow from strategy formulation to tactical execution with monthly tracking and visual indicators.'
   },
   {
     id: 'wb-3',
@@ -219,7 +223,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Decision-making framework for prioritization and funding',
     category: 'portfolio',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Created comprehensive governance module with decision tracking across all portfolio types. Supports multiple decision types (funding, priority changes, resource allocation, approvals, cancellations) with full rationale capture, impact assessment, and alternatives documentation. Includes real-time governance metrics, budget utilization tracking, and initiative review workflows to enable data-driven strategic decision-making at the portfolio level.'
   },
   {
     id: 'int-1',

@@ -19,7 +19,9 @@ import {
   CurrencyDollar,
   CheckCircle,
   ChartLineUp,
-  GitBranch
+  GitBranch,
+  ArrowsDownUp,
+  Gavel
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -38,6 +40,8 @@ import BowlingChart from './components/BowlingChart'
 import OKRManagement from './components/OKRManagement'
 import FinancialTracking from './components/FinancialTracking'
 import ExecutiveDashboard from './components/ExecutiveDashboard'
+import StrategyToInitiative from './components/StrategyToInitiative'
+import PortfolioGovernance from './components/PortfolioGovernance'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -61,6 +65,7 @@ const navigationSections: NavigationSection[] = [
       { id: 'strategy', label: 'Strategy Cards', icon: Strategy, component: StrategyCards },
       { id: 'comparison', label: 'Compare', icon: ArrowsLeftRight, component: StrategyComparison },
       { id: 'traceability', label: 'Traceability', icon: Tree, component: StrategyTraceability },
+      { id: 'strategy-to-initiative', label: 'Strategy to Initiative', icon: ArrowsDownUp, component: StrategyToInitiative },
     ]
   },
   {
@@ -72,6 +77,7 @@ const navigationSections: NavigationSection[] = [
       { id: 'okr', label: 'OKR Management', icon: CheckCircle, component: OKRManagement },
       { id: 'portfolios', label: 'Portfolios', icon: FolderOpen, component: Portfolios },
       { id: 'portfolio-analysis', label: 'Portfolio Analysis', icon: GitBranch, component: PortfolioAnalysis },
+      { id: 'portfolio-governance', label: 'Portfolio Governance', icon: Gavel, component: PortfolioGovernance },
     ]
   },
   {
@@ -291,11 +297,13 @@ function getModuleDescription(moduleId: string): string {
     'strategy': 'Create and manage strategic frameworks using proven methodologies',
     'comparison': 'Compare multiple strategic options side-by-side',
     'traceability': 'Map relationships from goals to initiatives',
+    'strategy-to-initiative': 'AI-powered translation of strategy into executable initiatives',
     'workbench': 'Execute and track strategic initiatives',
     'tracker': 'Monitor initiative progress with real-time status',
     'okr': 'Define and track Objectives and Key Results',
     'portfolios': 'Organize initiatives into strategic portfolios',
     'portfolio-analysis': 'Strategic alignment, capacity & dependency analysis',
+    'portfolio-governance': 'Decision framework for prioritization and resource allocation',
     'x-matrix': 'Align objectives using Hoshin Kanri methodology',
     'bowling': 'Track monthly progress with visual indicators',
     'roadmap': 'Visualize strategic timeline and milestones',
