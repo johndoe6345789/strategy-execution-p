@@ -253,7 +253,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Financial and operational data sync with ERP systems',
     category: 'integration',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive ERP integration system supporting SAP, Oracle, Microsoft Dynamics, NetSuite, Workday, Sage, and Infor. Features include connection management with production/sandbox/development environments, configurable sync intervals with auto-sync capabilities, multiple data source support (financials, purchasing, inventory, HR, manufacturing), connection testing and status monitoring, sync history logging with detailed metrics, API key security with show/hide functionality, and financial data visualization. Users can manage multiple ERP connections simultaneously, configure field mappings, track sync operations with success/error logging, and import financial data including revenue, expenses, and profit tracking across periods.'
   },
   {
     id: 'int-3',
@@ -261,7 +263,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Customer and revenue data integration',
     category: 'integration',
     priority: 'low',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built complete CRM integration platform supporting Salesforce, HubSpot, Microsoft Dynamics CRM, Zoho CRM, Pipedrive, and Zendesk Sell. Features include multi-connection management with sandbox/production environments, configurable data sources (contacts, accounts, opportunities, leads, activities), automated sync scheduling with adjustable intervals, customer data management with company info, contact details, account values, and status tracking (prospect/customer/churned), sales pipeline visualization with opportunity tracking including values, stages, probability percentages, and close dates, sync operation logging with detailed status tracking, connection testing capabilities, and comprehensive revenue analytics showing total account value and pipeline metrics. Provides complete visibility into customer relationships and sales performance.'
   },
   {
     id: 'int-4',

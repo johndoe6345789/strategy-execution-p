@@ -34,7 +34,9 @@ import {
   Translate,
   Link as LinkIcon,
   Question,
-  FileArrowDown
+  FileArrowDown,
+  Database,
+  Storefront
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -72,6 +74,8 @@ import ProjectIntegrations from './components/ProjectIntegrations'
 import LanguageSettings from './components/LanguageSettings'
 import OnboardingHelp from './components/OnboardingHelp'
 import DataImportExport from './components/DataImportExport'
+import ERPIntegration from './components/ERPIntegration'
+import CRMIntegration from './components/CRMIntegration'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -160,6 +164,8 @@ const navigationSections: NavigationSection[] = [
       { id: 'data-import-export', label: 'Data Import & Export', icon: FileArrowDown, component: DataImportExport },
       { id: 'api-webhooks', label: 'API & Webhooks', icon: GitBranch, component: APIWebhooks },
       { id: 'project-integrations', label: 'Project Management', icon: LinkIcon, component: ProjectIntegrations },
+      { id: 'erp-integration', label: 'ERP Integration', icon: Database, component: ERPIntegration },
+      { id: 'crm-integration', label: 'CRM Integration', icon: Storefront, component: CRMIntegration },
       { id: 'language-settings', label: 'Language & Regional', icon: Translate, component: LanguageSettings },
       { id: 'rbac', label: 'Access Control', icon: Shield, component: RoleBasedAccess },
       { id: 'audit-trail', label: 'Audit Trail', icon: BookOpen, component: AuditTrail },
@@ -385,6 +391,8 @@ function getModuleDescription(moduleId: string): string {
     'data-import-export': 'Backup, migrate, or bulk-load strategic data',
     'api-webhooks': 'Integrate with external systems via REST API and webhooks',
     'project-integrations': 'Connect Jira, Asana, Monday.com and other PM tools',
+    'erp-integration': 'Sync financial and operational data from ERP systems',
+    'crm-integration': 'Import customer and revenue data from CRM platforms',
     'language-settings': 'Configure language, currency, and regional preferences',
     'rbac': 'Manage user roles, permissions, and access control',
     'audit-trail': 'Complete activity tracking and change history',
