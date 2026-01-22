@@ -103,7 +103,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Objectives and Key Results tracking and alignment',
     category: 'workbench',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive OKR management system with objectives, key results, progress tracking, category organization (company/team/individual), quarterly and annual timeframes, and real-time status updates with automatic objective status calculation based on key result progress.'
   },
   {
     id: 'wb-5',
@@ -177,7 +179,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Group initiatives into portfolios (M&A, OpEx, ESG, etc.)',
     category: 'portfolio',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented portfolio grouping system with predefined portfolio types including Operational Excellence, M&A, Financial Transformation, ESG, and Innovation. Initiatives can be assigned to portfolios during creation or editing.'
   },
   {
     id: 'pf-2',
@@ -185,7 +189,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Assess strategic alignment and impact across portfolios',
     category: 'portfolio',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive portfolio analysis module showing strategic alignment percentage, initiative health distribution, budget allocation, and average progress across all portfolios with detailed drill-down capability.'
   },
   {
     id: 'pf-3',
@@ -193,7 +199,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Resource capacity planning and allocation',
     category: 'portfolio',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Created capacity planning module with team size tracking, utilization rate calculation, capacity threshold warnings (near/over capacity), and visual indicators for resource allocation across portfolios.'
   },
   {
     id: 'pf-4',
@@ -201,7 +209,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Track and visualize cross-initiative dependencies',
     category: 'portfolio',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented dependency tracking system supporting three relationship types (blocks, enables, informs) with active/resolved status workflow, dependency visualization, and resolution workflow to manage critical path and initiative blockers.'
   },
   {
     id: 'pf-5',
@@ -281,7 +291,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Portfolio-level dashboards for leadership',
     category: 'reporting',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive executive dashboard with high-level KPIs, portfolio performance breakdowns, financial value realization tracking, initiative health distribution, and recent activity feed providing leadership with complete strategic oversight.'
   },
   {
     id: 'rp-2',
@@ -297,7 +309,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Link initiatives to financial results and savings',
     category: 'reporting',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Created financial tracking system linking initiatives to measurable financial outcomes including cost savings, revenue increase, cost avoidance, and efficiency gains with planned vs actual tracking, realization status workflow (projected → realized → validated), and category-based analysis with variance reporting.'
   },
   {
     id: 'rp-4',

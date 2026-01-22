@@ -15,12 +15,17 @@ import {
   GridFour, 
   Circle,
   House,
-  CaretDown
+  CaretDown,
+  CurrencyDollar,
+  CheckCircle,
+  ChartLineUp,
+  GitBranch
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
 import Workbench from './components/Workbench'
 import Portfolios from './components/Portfolios'
+import PortfolioAnalysis from './components/PortfolioAnalysis'
 import Dashboard from './components/Dashboard'
 import Roadmap from './components/Roadmap'
 import ProductRoadmap from './components/ProductRoadmap'
@@ -30,6 +35,9 @@ import StrategyComparison from './components/StrategyComparison'
 import StrategyTraceability from './components/StrategyTraceability'
 import XMatrix from './components/XMatrix'
 import BowlingChart from './components/BowlingChart'
+import OKRManagement from './components/OKRManagement'
+import FinancialTracking from './components/FinancialTracking'
+import ExecutiveDashboard from './components/ExecutiveDashboard'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -61,7 +69,9 @@ const navigationSections: NavigationSection[] = [
     items: [
       { id: 'workbench', label: 'Workbench', icon: ChartBar, component: Workbench },
       { id: 'tracker', label: 'Initiative Tracker', icon: TrendUp, component: InitiativeTracker },
+      { id: 'okr', label: 'OKR Management', icon: CheckCircle, component: OKRManagement },
       { id: 'portfolios', label: 'Portfolios', icon: FolderOpen, component: Portfolios },
+      { id: 'portfolio-analysis', label: 'Portfolio Analysis', icon: GitBranch, component: PortfolioAnalysis },
     ]
   },
   {
@@ -84,8 +94,10 @@ const navigationSections: NavigationSection[] = [
     id: 'reporting',
     label: 'Reporting',
     items: [
-      { id: 'dashboard', label: 'Executive Dashboard', icon: Target, component: Dashboard },
+      { id: 'executive-dashboard', label: 'Executive Dashboard', icon: ChartLineUp, component: ExecutiveDashboard },
+      { id: 'dashboard', label: 'Performance Dashboard', icon: Target, component: Dashboard },
       { id: 'kpi', label: 'KPI Scorecard', icon: ChartLine, component: KPIDashboard },
+      { id: 'financial', label: 'Financial Tracking', icon: CurrencyDollar, component: FinancialTracking },
     ]
   }
 ]
@@ -281,13 +293,17 @@ function getModuleDescription(moduleId: string): string {
     'traceability': 'Map relationships from goals to initiatives',
     'workbench': 'Execute and track strategic initiatives',
     'tracker': 'Monitor initiative progress with real-time status',
+    'okr': 'Define and track Objectives and Key Results',
     'portfolios': 'Organize initiatives into strategic portfolios',
+    'portfolio-analysis': 'Strategic alignment, capacity & dependency analysis',
     'x-matrix': 'Align objectives using Hoshin Kanri methodology',
     'bowling': 'Track monthly progress with visual indicators',
     'roadmap': 'Visualize strategic timeline and milestones',
     'product-roadmap': 'Plan and track product development initiatives',
-    'dashboard': 'Executive-level view of strategic performance',
+    'executive-dashboard': 'Executive-level strategic performance overview',
+    'dashboard': 'Real-time performance metrics and insights',
     'kpi': 'Monitor key performance indicators and metrics',
+    'financial': 'Track financial outcomes and value realization',
   }
   return descriptions[moduleId] || 'Manage your strategic initiatives'
 }
