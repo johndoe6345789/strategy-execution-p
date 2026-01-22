@@ -30,7 +30,11 @@ import {
   Recycle,
   Sparkle,
   GlobeHemisphereWest,
-  Shield
+  Shield,
+  Translate,
+  Link as LinkIcon,
+  Question,
+  FileArrowDown
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -64,6 +68,10 @@ import MultiRegionReporting from './components/MultiRegionReporting'
 import APIWebhooks from './components/APIWebhooks'
 import RoleBasedAccess from './components/RoleBasedAccess'
 import AuditTrail from './components/AuditTrail'
+import ProjectIntegrations from './components/ProjectIntegrations'
+import LanguageSettings from './components/LanguageSettings'
+import OnboardingHelp from './components/OnboardingHelp'
+import DataImportExport from './components/DataImportExport'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -148,7 +156,11 @@ const navigationSections: NavigationSection[] = [
     id: 'platform',
     label: 'Platform',
     items: [
+      { id: 'onboarding-help', label: 'Getting Started & Help', icon: Question, component: OnboardingHelp },
+      { id: 'data-import-export', label: 'Data Import & Export', icon: FileArrowDown, component: DataImportExport },
       { id: 'api-webhooks', label: 'API & Webhooks', icon: GitBranch, component: APIWebhooks },
+      { id: 'project-integrations', label: 'Project Management', icon: LinkIcon, component: ProjectIntegrations },
+      { id: 'language-settings', label: 'Language & Regional', icon: Translate, component: LanguageSettings },
       { id: 'rbac', label: 'Access Control', icon: Shield, component: RoleBasedAccess },
       { id: 'audit-trail', label: 'Audit Trail', icon: BookOpen, component: AuditTrail },
     ]
@@ -369,7 +381,11 @@ function getModuleDescription(moduleId: string): string {
     'custom-scorecard': 'Create and manage configurable performance scorecards',
     'financial': 'Track financial outcomes and value realization',
     'automated-reports': 'Generate comprehensive reports from your strategic data',
+    'onboarding-help': 'Tutorials, guides, and help resources to master StrategyOS',
+    'data-import-export': 'Backup, migrate, or bulk-load strategic data',
     'api-webhooks': 'Integrate with external systems via REST API and webhooks',
+    'project-integrations': 'Connect Jira, Asana, Monday.com and other PM tools',
+    'language-settings': 'Configure language, currency, and regional preferences',
     'rbac': 'Manage user roles, permissions, and access control',
     'audit-trail': 'Complete activity tracking and change history',
   }

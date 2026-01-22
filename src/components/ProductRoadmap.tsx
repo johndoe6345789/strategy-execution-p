@@ -243,7 +243,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Connect with Jira, Asana, Monday.com, etc.',
     category: 'integration',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive project management integration system supporting Jira, Asana, Monday.com, Trello, ClickUp, and Azure DevOps. Features include API key management, configurable sync intervals, auto-sync capabilities, field mapping configuration (status, assignee, progress, priority, description), sync status tracking with detailed logs, webhook-style event notifications, and bidirectional data synchronization. Users can enable/disable integrations, trigger manual syncs, view sync history with success/error tracking, and configure which fields sync between StrategyOS initiatives and external project management systems.'
   },
   {
     id: 'int-2',
@@ -367,7 +369,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Minimal training required, clear visual models',
     category: 'non-functional',
     priority: 'critical',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive onboarding and help system including interactive quick-start guide with 5 progressive onboarding steps (strategy creation, initiative management, portfolio organization, KPI tracking, executive dashboard review), video tutorial library covering basics, planning, execution, portfolio management, reporting, and Hoshin Kanri with difficulty levels and time estimates, extensive FAQ section answering common questions about strategy cards, initiatives, portfolios, X-Matrix, OKRs, KPIs, traceability, and customization, quick tips panel with best practices, welcome dialog for new users with platform overview, progress tracking for onboarding completion, tutorial step-by-step walkthroughs, and additional resources section linking to documentation, community, and support. System reduces learning curve significantly with contextual guidance throughout the platform.'
   },
   {
     id: 'nf-2',
@@ -391,7 +395,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Support for multiple regions and languages',
     category: 'non-functional',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive internationalization (i18n) system supporting 12 languages: English, Spanish, French, German, Japanese, Chinese, Portuguese, Italian, Korean, Arabic (RTL), Russian, and Hindi. Features include language selection with native name display and translation progress tracking, configurable date formats (MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, DD.MM.YYYY), 12-hour and 24-hour time formats, multi-currency support with 10 major currencies (USD, EUR, GBP, JPY, CNY, BRL, INR, KRW, RUB, AUD) including proper locale-based formatting, timezone configuration across 15 major timezones, auto-detect language from browser settings, live format preview showing real-time examples, and RTL (right-to-left) support for Arabic. All settings are persisted and applied consistently across the entire platform.'
   },
   {
     id: 'nf-5',
