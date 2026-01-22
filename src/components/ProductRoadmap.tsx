@@ -267,7 +267,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Extensible API for custom integrations',
     category: 'integration',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive API & Webhooks management system with REST API documentation for all major endpoints (strategies, initiatives, portfolios, KPIs, OKRs), API key generation and management with secure token generation, webhook configuration with event subscriptions (strategy.created, initiative.updated, etc.), webhook status management and delivery tracking, authentication using Bearer tokens, and complete code examples for integration. Provides extensible foundation for external system integrations.'
   },
   {
     id: 'ox-1',
@@ -397,7 +399,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Security and permissions management',
     category: 'non-functional',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive Role-Based Access Control (RBAC) system with four predefined roles (Administrator, Manager, Contributor, Viewer), granular permissions across all modules with read/write/delete/admin controls, user management with role assignment and department organization, user status management (active/inactive), detailed permissions matrix showing access levels for each role across 14+ platform modules, user profile management with avatar display, department-based access organization, and complete visibility into role capabilities. Enables secure, enterprise-grade access control with clear separation of duties.'
   },
   {
     id: 'nf-6',
@@ -405,7 +409,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Complete change history and data integrity',
     category: 'non-functional',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive audit trail system tracking all user activities across the platform. Features include detailed logging of all actions (created, updated, deleted, viewed, exported, shared), entity tracking across all module types (strategies, initiatives, portfolios, OKRs, KPIs, reports, users, API keys, webhooks), change history with field-level before/after values, user attribution with timestamps and IP addresses, advanced filtering by action type, entity type, user, date range, and search query, activity statistics dashboard, CSV export capability for compliance reporting, and relative time display. Provides complete accountability and audit compliance with tamper-evident activity records.'
   }
 ]
 

@@ -29,7 +29,8 @@ import {
   BookOpen,
   Recycle,
   Sparkle,
-  GlobeHemisphereWest
+  GlobeHemisphereWest,
+  Shield
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -60,6 +61,9 @@ import LeanProcessSupport from './components/LeanProcessSupport'
 import StrategyFrameworkWizard from './components/StrategyFrameworkWizard'
 import DrillDownReporting from './components/DrillDownReporting'
 import MultiRegionReporting from './components/MultiRegionReporting'
+import APIWebhooks from './components/APIWebhooks'
+import RoleBasedAccess from './components/RoleBasedAccess'
+import AuditTrail from './components/AuditTrail'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -138,6 +142,15 @@ const navigationSections: NavigationSection[] = [
       { id: 'custom-scorecard', label: 'Custom Scorecards', icon: Presentation, component: CustomScorecard },
       { id: 'financial', label: 'Financial Tracking', icon: CurrencyDollar, component: FinancialTracking },
       { id: 'automated-reports', label: 'Automated Reports', icon: FileText, component: AutomatedReportGeneration },
+    ]
+  },
+  {
+    id: 'platform',
+    label: 'Platform',
+    items: [
+      { id: 'api-webhooks', label: 'API & Webhooks', icon: GitBranch, component: APIWebhooks },
+      { id: 'rbac', label: 'Access Control', icon: Shield, component: RoleBasedAccess },
+      { id: 'audit-trail', label: 'Audit Trail', icon: BookOpen, component: AuditTrail },
     ]
   }
 ]
@@ -356,6 +369,9 @@ function getModuleDescription(moduleId: string): string {
     'custom-scorecard': 'Create and manage configurable performance scorecards',
     'financial': 'Track financial outcomes and value realization',
     'automated-reports': 'Generate comprehensive reports from your strategic data',
+    'api-webhooks': 'Integrate with external systems via REST API and webhooks',
+    'rbac': 'Manage user roles, permissions, and access control',
+    'audit-trail': 'Complete activity tracking and change history',
   }
   return descriptions[moduleId] || 'Manage your strategic initiatives'
 }
