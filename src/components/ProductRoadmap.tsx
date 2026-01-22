@@ -1,6 +1,5 @@
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -10,545 +9,324 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CheckCircle, Circle, Target, ChartBar, Users, Database, Rocket, Shield, Plus, FunnelSimple, CalendarBlank, ChatCircleText } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { 
+  Plus, 
+  FunnelSimple, 
+  CalendarBlank, 
+  Target,
+  Rocket,
+  Users,
+  GitBranch,
+  Flag,
+  Pencil,
+  Trash,
+  ArrowsDownUp,
+  Sparkle,
+  Lightning,
+  ChartLine,
+  Stack
+} from '@phosphor-icons/react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import type { StatusType, PriorityType } from '@/types'
 
-interface RoadmapFeature {
+interface ProductFeature {
   id: string
-  name: string
+  title: string
   description: string
-  category: 'strategy-cards' | 'workbench' | 'cross-product' | 'portfolio' | 'integration' | 'opex' | 'reporting' | 'non-functional'
-  priority: 'critical' | 'high' | 'medium' | 'low'
-  completed: boolean
-  estimatedDate?: string
-  completedDate?: string
+  category: 'core' | 'enhancement' | 'integration' | 'infrastructure'
+  status: StatusType
+  priority: PriorityType
+  owner: string
+  release: string
+  startDate: string
+  endDate: string
+  progress: number
+  dependencies: string[]
+  tags: string[]
+  effort: number
+  value: number
   notes?: string
 }
 
-const initialFeatures: RoadmapFeature[] = [
-  {
-    id: 'sc-1',
-    name: 'Strategy Framework Templates',
-    description: 'Support for proven frameworks (SWOT, Porter\'s 5 Forces, Blue Ocean, etc.)',
-    category: 'strategy-cards',
-    priority: 'critical',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Implemented comprehensive framework wizard with SWOT, Porter\'s Five Forces, and Blue Ocean Strategy templates with guided step-by-step creation process.'
-  },
-  {
-    id: 'sc-2',
-    name: 'Strategy Exploration & Comparison',
-    description: 'Enable comparison and refinement of multiple strategic options',
-    category: 'strategy-cards',
-    priority: 'high',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Implemented comprehensive side-by-side strategy comparison tool that allows users to evaluate multiple strategic options across all key dimensions including vision, goals, metrics, and assumptions with detailed summary analysis.'
-  },
-  {
-    id: 'sc-3',
-    name: 'Collaborative Workshops',
-    description: 'Real-time collaboration features for strategy workshops',
-    category: 'strategy-cards',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'sc-4',
-    name: 'Rationale & Decision Capture',
-    description: 'Capture assumptions, rationale, and strategic decisions',
-    category: 'strategy-cards',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'sc-5',
-    name: 'Guided Strategy Creation',
-    description: 'Step-by-step wizard for strategy formulation',
-    category: 'strategy-cards',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'wb-1',
-    name: 'Strategy-to-Execution Translation',
-    description: 'Convert strategic objectives into initiatives and projects',
-    category: 'workbench',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'wb-2',
-    name: 'Hoshin Kanri Support',
-    description: 'Full Hoshin Kanri methodology implementation',
-    category: 'workbench',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'wb-3',
-    name: 'X-Matrix',
-    description: 'Interactive X-Matrix for breakthrough objectives and annual goals',
-    category: 'workbench',
-    priority: 'high',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Built complete X-Matrix tool supporting breakthrough objectives (3-5 year), annual objectives, metrics, and improvement actions with interactive relationship mapping using strong/medium/weak correlation indicators for strategic alignment visualization.'
-  },
-  {
-    id: 'wb-4',
-    name: 'OKR Management',
-    description: 'Objectives and Key Results tracking and alignment',
-    category: 'workbench',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'wb-5',
-    name: 'KPI & Metrics Dashboard',
-    description: 'Real-time KPI tracking with visual scorecards',
-    category: 'workbench',
-    priority: 'critical',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Built comprehensive KPI dashboard with real-time tracking, trend analysis, category organization, and drill-down capability. Supports financial, operational, customer, and strategic metrics.'
-  },
-  {
-    id: 'wb-6',
-    name: 'Bowling Chart',
-    description: 'Monthly progress tracking with red/yellow/green status',
-    category: 'workbench',
-    priority: 'high',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Implemented visual bowling chart with monthly tracking grid, red/yellow/green status indicators, actual vs target metrics for each month, and real-time status counts dashboard showing at-a-glance progress across all objectives.'
-  },
-  {
-    id: 'wb-7',
-    name: 'Ownership & Accountability',
-    description: 'Clear owner assignment and responsibility tracking',
-    category: 'workbench',
-    priority: 'critical',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Implemented owner assignment with avatar display, progress update attribution, and accountability tracking through the Initiative Tracker.'
-  },
-  {
-    id: 'wb-8',
-    name: 'Initiative Progress Tracking',
-    description: 'Real-time tracking of initiative status and progress',
-    category: 'workbench',
-    priority: 'critical',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Created comprehensive initiative tracker with status monitoring, progress updates, timeline tracking, budget visibility, and complete update history with notes.'
-  },
-  {
-    id: 'cp-1',
-    name: 'Single Source of Truth',
-    description: 'Centralized repository for all strategy and execution data',
-    category: 'cross-product',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'cp-2',
-    name: 'End-to-End Traceability',
-    description: 'Link strategic goals to initiatives to KPIs to individual objectives',
-    category: 'cross-product',
-    priority: 'critical',
-    completed: true,
-    completedDate: new Date().toISOString().split('T')[0],
-    notes: 'Created comprehensive traceability visualization showing complete line of sight from strategy cards to linked initiatives with status tracking, orphan detection for unlinked initiatives and strategies, and detailed drill-down capability to explore strategic alignment.'
-  },
-  {
-    id: 'cp-3',
-    name: 'Strategy Cards ↔ Workbench Integration',
-    description: 'Seamless data flow between strategy creation and execution',
-    category: 'cross-product',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'pf-1',
-    name: 'Strategic Portfolio Creation',
-    description: 'Group initiatives into portfolios (M&A, OpEx, ESG, etc.)',
-    category: 'portfolio',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'pf-2',
-    name: 'Portfolio Alignment Analysis',
-    description: 'Assess strategic alignment and impact across portfolios',
-    category: 'portfolio',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'pf-3',
-    name: 'Capacity & Demand Balancing',
-    description: 'Resource capacity planning and allocation',
-    category: 'portfolio',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'pf-4',
-    name: 'Dependency Management',
-    description: 'Track and visualize cross-initiative dependencies',
-    category: 'portfolio',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'pf-5',
-    name: 'Portfolio Governance',
-    description: 'Decision-making framework for prioritization and funding',
-    category: 'portfolio',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'int-1',
-    name: 'Project Management Tool Integration',
-    description: 'Connect with Jira, Asana, Monday.com, etc.',
-    category: 'integration',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'int-2',
-    name: 'ERP System Integration',
-    description: 'Financial and operational data sync with ERP systems',
-    category: 'integration',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'int-3',
-    name: 'CRM Integration',
-    description: 'Customer and revenue data integration',
-    category: 'integration',
-    priority: 'low',
-    completed: false
-  },
-  {
-    id: 'int-4',
-    name: 'API & Webhooks',
-    description: 'Extensible API for custom integrations',
-    category: 'integration',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'ox-1',
-    name: 'Lean Process Support',
-    description: 'Lean methodology tools and templates',
-    category: 'opex',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'ox-2',
-    name: 'Countermeasure Management',
-    description: 'Track improvement actions, not just KPI reporting',
-    category: 'opex',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'ox-3',
-    name: 'PDCA Cycle Tracking',
-    description: 'Plan-Do-Check-Act continuous improvement cycles',
-    category: 'opex',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'ox-4',
-    name: 'Multi-Region Reporting',
-    description: 'Consistent reporting across global units',
-    category: 'opex',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'rp-1',
-    name: 'Executive Dashboard',
-    description: 'Portfolio-level dashboards for leadership',
-    category: 'reporting',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'rp-2',
-    name: 'Drill-Down Reporting',
-    description: 'Navigate from enterprise level to project details',
-    category: 'reporting',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'rp-3',
-    name: 'Financial Outcome Tracking',
-    description: 'Link initiatives to financial results and savings',
-    category: 'reporting',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'rp-4',
-    name: 'Custom Scorecards',
-    description: 'Configurable scorecards with standard definitions',
-    category: 'reporting',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'rp-5',
-    name: 'Automated Report Generation',
-    description: 'Replace manual spreadsheet reporting',
-    category: 'reporting',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'nf-1',
-    name: 'Intuitive UX Design',
-    description: 'Minimal training required, clear visual models',
-    category: 'non-functional',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'nf-2',
-    name: 'Global Scalability',
-    description: 'Support for global organizations with large datasets',
-    category: 'non-functional',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'nf-3',
-    name: 'High Availability',
-    description: 'Enterprise-grade uptime and reliability',
-    category: 'non-functional',
-    priority: 'critical',
-    completed: false
-  },
-  {
-    id: 'nf-4',
-    name: 'Multi-Language Support',
-    description: 'Support for multiple regions and languages',
-    category: 'non-functional',
-    priority: 'medium',
-    completed: false
-  },
-  {
-    id: 'nf-5',
-    name: 'Role-Based Access Control',
-    description: 'Security and permissions management',
-    category: 'non-functional',
-    priority: 'high',
-    completed: false
-  },
-  {
-    id: 'nf-6',
-    name: 'Audit Trail',
-    description: 'Complete change history and data integrity',
-    category: 'non-functional',
-    priority: 'medium',
-    completed: false
-  }
-]
-
 const categoryConfig = {
-  'strategy-cards': { label: 'Strategy Cards', icon: Target, color: 'bg-blue-500' },
-  'workbench': { label: 'Workbench', icon: ChartBar, color: 'bg-purple-500' },
-  'cross-product': { label: 'Cross-Product', icon: Rocket, color: 'bg-accent' },
-  'portfolio': { label: 'Portfolio Management', icon: Database, color: 'bg-green-500' },
-  'integration': { label: 'Integration & APIs', icon: Database, color: 'bg-orange-500' },
-  'opex': { label: 'Operational Excellence', icon: Target, color: 'bg-teal-500' },
-  'reporting': { label: 'Reporting & Visibility', icon: ChartBar, color: 'bg-pink-500' },
-  'non-functional': { label: 'Platform & Infrastructure', icon: Shield, color: 'bg-gray-500' }
+  'core': { label: 'Core Features', icon: Rocket, color: 'bg-blue-500' },
+  'enhancement': { label: 'Enhancements', icon: Sparkle, color: 'bg-purple-500' },
+  'integration': { label: 'Integrations', icon: GitBranch, color: 'bg-green-500' },
+  'infrastructure': { label: 'Infrastructure', icon: Stack, color: 'bg-orange-500' }
 }
 
-const priorityColors = {
-  critical: 'destructive',
-  high: 'default',
-  medium: 'secondary',
-  low: 'outline'
+const statusConfig = {
+  'not-started': { label: 'Not Started', color: 'secondary' },
+  'on-track': { label: 'On Track', color: 'default' },
+  'at-risk': { label: 'At Risk', color: 'destructive' },
+  'blocked': { label: 'Blocked', color: 'destructive' },
+  'completed': { label: 'Completed', color: 'outline' }
+} as const
+
+const priorityConfig = {
+  'critical': { label: 'Critical', color: 'destructive', score: 4 },
+  'high': { label: 'High', color: 'default', score: 3 },
+  'medium': { label: 'Medium', color: 'secondary', score: 2 },
+  'low': { label: 'Low', color: 'outline', score: 1 }
 } as const
 
 export default function ProductRoadmap() {
-  const [features, setFeatures] = useKV<RoadmapFeature[]>('product-roadmap-features', initialFeatures)
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [filterPriority, setFilterPriority] = useState<string>('all')
+  const [features, setFeatures] = useKV<ProductFeature[]>('product-features', [])
+  const [releases, setReleases] = useKV<string[]>('product-releases', ['Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025'])
+  const [selectedRelease, setSelectedRelease] = useState<string>('all')
+  const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [viewMode, setViewMode] = useState<'kanban' | 'timeline' | 'list'>('kanban')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editingFeature, setEditingFeature] = useState<RoadmapFeature | null>(null)
-  const [newFeature, setNewFeature] = useState({
-    name: '',
+  const [editingFeature, setEditingFeature] = useState<ProductFeature | null>(null)
+  const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
+  const [newRelease, setNewRelease] = useState('')
+
+  const releasesList = releases || ['Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025']
+
+  const [formData, setFormData] = useState<Partial<ProductFeature>>({
+    title: '',
     description: '',
-    category: 'strategy-cards' as const,
-    priority: 'medium' as const,
-    estimatedDate: '',
+    category: 'core',
+    status: 'not-started',
+    priority: 'medium',
+    owner: '',
+    release: releasesList[0],
+    startDate: '',
+    endDate: '',
+    progress: 0,
+    dependencies: [],
+    tags: [],
+    effort: 3,
+    value: 3,
     notes: ''
   })
 
-  const toggleFeature = (featureId: string) => {
-    setFeatures((current) => 
-      (current || []).map(f => 
-        f.id === featureId ? { 
-          ...f, 
-          completed: !f.completed,
-          completedDate: !f.completed ? new Date().toISOString().split('T')[0] : undefined
-        } : f
-      )
-    )
-    toast.success(features?.find(f => f.id === featureId)?.completed ? 'Feature reopened' : 'Feature completed!')
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      category: 'core',
+      status: 'not-started',
+      priority: 'medium',
+      owner: '',
+      release: releasesList[0],
+      startDate: '',
+      endDate: '',
+      progress: 0,
+      dependencies: [],
+      tags: [],
+      effort: 3,
+      value: 3,
+      notes: ''
+    })
+    setEditingFeature(null)
   }
 
-  const addFeature = () => {
-    if (!newFeature.name.trim() || !newFeature.description.trim()) {
-      toast.error('Please fill in name and description')
+  const handleAddFeature = () => {
+    if (!formData.title?.trim() || !formData.description?.trim()) {
+      toast.error('Please fill in title and description')
       return
     }
 
-    const feature: RoadmapFeature = {
-      id: `custom-${Date.now()}`,
-      name: newFeature.name,
-      description: newFeature.description,
-      category: newFeature.category,
-      priority: newFeature.priority,
-      completed: false,
-      estimatedDate: newFeature.estimatedDate || undefined,
-      notes: newFeature.notes || undefined
+    const feature: ProductFeature = {
+      id: `feat-${Date.now()}`,
+      title: formData.title,
+      description: formData.description,
+      category: formData.category || 'core',
+      status: formData.status || 'not-started',
+      priority: formData.priority || 'medium',
+      owner: formData.owner || 'Unassigned',
+      release: formData.release || releasesList[0],
+      startDate: formData.startDate || '',
+      endDate: formData.endDate || '',
+      progress: formData.progress || 0,
+      dependencies: formData.dependencies || [],
+      tags: formData.tags || [],
+      effort: formData.effort || 3,
+      value: formData.value || 3,
+      notes: formData.notes
     }
 
     setFeatures((current) => [...(current || []), feature])
     setIsAddDialogOpen(false)
-    setNewFeature({
-      name: '',
-      description: '',
-      category: 'strategy-cards',
-      priority: 'medium',
-      estimatedDate: '',
-      notes: ''
-    })
+    resetForm()
     toast.success('Feature added to roadmap!')
   }
 
-  const updateFeatureNotes = (featureId: string, notes: string) => {
+  const handleUpdateFeature = () => {
+    if (!editingFeature) return
+    
     setFeatures((current) =>
-      (current || []).map(f =>
-        f.id === featureId ? { ...f, notes } : f
+      (current || []).map((f) =>
+        f.id === editingFeature.id
+          ? { ...editingFeature, ...formData }
+          : f
       )
     )
+    setIsAddDialogOpen(false)
+    resetForm()
+    toast.success('Feature updated!')
   }
 
-  const filteredFeatures = (features || []).filter(f => {
-    if (filterPriority !== 'all' && f.priority !== filterPriority) return false
-    if (filterStatus === 'completed' && !f.completed) return false
-    if (filterStatus === 'in-progress' && f.completed) return false
-    return true
-  })
+  const handleDeleteFeature = (id: string) => {
+    setFeatures((current) => (current || []).filter((f) => f.id !== id))
+    toast.success('Feature deleted')
+  }
 
-  const categorizedFeatures = selectedCategory === 'all' 
-    ? Object.keys(categoryConfig).map(cat => ({
-        category: cat as keyof typeof categoryConfig,
-        features: filteredFeatures.filter(f => f.category === cat)
-      }))
-    : [{
-        category: selectedCategory as keyof typeof categoryConfig,
-        features: filteredFeatures.filter(f => f.category === selectedCategory)
-      }]
+  const handleEditFeature = (feature: ProductFeature) => {
+    setEditingFeature(feature)
+    setFormData(feature)
+    setIsAddDialogOpen(true)
+  }
 
-  const totalFeatures = filteredFeatures.length
-  const completedFeatures = filteredFeatures.filter(f => f.completed).length
-  const completionPercentage = totalFeatures > 0 ? Math.round((completedFeatures / totalFeatures) * 100) : 0
-
-  const categoryProgress = Object.keys(categoryConfig).map(cat => {
-    const categoryFeatures = filteredFeatures.filter(f => f.category === cat)
-    const completed = categoryFeatures.filter(f => f.completed).length
-    const total = categoryFeatures.length
-    return {
-      category: cat as keyof typeof categoryConfig,
-      completed,
-      total,
-      percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+  const handleAddRelease = () => {
+    if (!newRelease.trim()) {
+      toast.error('Please enter a release name')
+      return
     }
-  })
+    
+    setReleases((current) => [...(current || []), newRelease])
+    setIsReleaseDialogOpen(false)
+    setNewRelease('')
+    toast.success('Release added!')
+  }
+
+  const filteredFeatures = useMemo(() => {
+    return (features || []).filter((f) => {
+      if (selectedRelease !== 'all' && f.release !== selectedRelease) return false
+      if (filterCategory !== 'all' && f.category !== filterCategory) return false
+      if (filterStatus !== 'all' && f.status !== filterStatus) return false
+      return true
+    })
+  }, [features, selectedRelease, filterCategory, filterStatus])
+
+  const releaseGroups = useMemo(() => {
+    const groups: Record<string, ProductFeature[]> = {}
+    
+    releasesList.forEach((release) => {
+      groups[release] = filteredFeatures.filter((f) => f.release === release)
+    })
+    
+    return groups
+  }, [releasesList, filteredFeatures])
+
+  const statusGroups = useMemo(() => {
+    const groups: Record<StatusType, ProductFeature[]> = {
+      'not-started': [],
+      'on-track': [],
+      'at-risk': [],
+      'blocked': [],
+      'completed': []
+    }
+    
+    filteredFeatures.forEach((feature) => {
+      groups[feature.status].push(feature)
+    })
+    
+    return groups
+  }, [filteredFeatures])
+
+  const stats = useMemo(() => {
+    const total = filteredFeatures.length
+    const completed = filteredFeatures.filter((f) => f.status === 'completed').length
+    const inProgress = filteredFeatures.filter((f) => ['on-track', 'at-risk', 'blocked'].includes(f.status)).length
+    const avgProgress = total > 0 
+      ? Math.round(filteredFeatures.reduce((sum, f) => sum + f.progress, 0) / total) 
+      : 0
+    
+    return { total, completed, inProgress, avgProgress }
+  }, [filteredFeatures])
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">StrategyOS Product Roadmap</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Product Roadmap</h2>
           <p className="text-muted-foreground mt-2">
-            Track development progress of core features and capabilities
+            Plan and track product development features across releases
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Card className="w-64">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{completedFeatures} of {totalFeatures}</span>
-                  <span className="font-bold text-accent">{completionPercentage}%</span>
+          <Dialog open={isReleaseDialogOpen} onOpenChange={setIsReleaseDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Flag size={16} weight="bold" />
+                Add Release
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Release</DialogTitle>
+                <DialogDescription>
+                  Create a new release milestone for your roadmap
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="release-name">Release Name</Label>
+                  <Input
+                    id="release-name"
+                    value={newRelease}
+                    onChange={(e) => setNewRelease(e.target.value)}
+                    placeholder="e.g., Q1 2025, v2.0, Sprint 10"
+                  />
                 </div>
-                <Progress value={completionPercentage} className="h-2" />
               </div>
-            </CardContent>
-          </Card>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsReleaseDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddRelease}>Add Release</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+            setIsAddDialogOpen(open)
+            if (!open) resetForm()
+          }}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus size={16} weight="bold" />
                 Add Feature
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Add Custom Feature</DialogTitle>
+                <DialogTitle>{editingFeature ? 'Edit Feature' : 'Add New Feature'}</DialogTitle>
                 <DialogDescription>
-                  Add a new feature to your product roadmap
+                  {editingFeature ? 'Update feature details' : 'Add a new feature to your product roadmap'}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="feature-name">Feature Name</Label>
+                  <Label htmlFor="title">Feature Title</Label>
                   <Input
-                    id="feature-name"
-                    value={newFeature.name}
-                    onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
-                    placeholder="e.g., Advanced Analytics Dashboard"
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g., User Authentication System"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="feature-description">Description</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Textarea
-                    id="feature-description"
-                    value={newFeature.description}
-                    onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Describe the feature and its value..."
                     rows={3}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="feature-category">Category</Label>
+                    <Label htmlFor="category">Category</Label>
                     <Select
-                      value={newFeature.category}
-                      onValueChange={(value: any) => setNewFeature({ ...newFeature, category: value })}
+                      value={formData.category}
+                      onValueChange={(value: any) => setFormData({ ...formData, category: value })}
                     >
-                      <SelectTrigger id="feature-category">
+                      <SelectTrigger id="category">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -561,256 +339,372 @@ export default function ProductRoadmap() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="feature-priority">Priority</Label>
+                    <Label htmlFor="priority">Priority</Label>
                     <Select
-                      value={newFeature.priority}
-                      onValueChange={(value: any) => setNewFeature({ ...newFeature, priority: value })}
+                      value={formData.priority}
+                      onValueChange={(value: any) => setFormData({ ...formData, priority: value })}
                     >
-                      <SelectTrigger id="feature-priority">
+                      <SelectTrigger id="priority">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="critical">Critical</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="low">Low</SelectItem>
+                        {Object.entries(priorityConfig).map(([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value: any) => setFormData({ ...formData, status: value })}
+                    >
+                      <SelectTrigger id="status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(statusConfig).map(([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="release">Release</Label>
+                    <Select
+                      value={formData.release}
+                      onValueChange={(value) => setFormData({ ...formData, release: value })}
+                    >
+                      <SelectTrigger id="release">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {releasesList.map((release) => (
+                          <SelectItem key={release} value={release}>
+                            {release}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="owner">Owner</Label>
+                    <Input
+                      id="owner"
+                      value={formData.owner}
+                      onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
+                      placeholder="Team or person name"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="progress">Progress (%)</Label>
+                    <Input
+                      id="progress"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.progress}
+                      onChange={(e) => setFormData({ ...formData, progress: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="startDate">Start Date</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="endDate">End Date</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="effort">Effort (1-5)</Label>
+                    <Select
+                      value={formData.effort?.toString()}
+                      onValueChange={(value) => setFormData({ ...formData, effort: parseInt(value) })}
+                    >
+                      <SelectTrigger id="effort">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num} - {num === 1 ? 'Very Low' : num === 2 ? 'Low' : num === 3 ? 'Medium' : num === 4 ? 'High' : 'Very High'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="value">Business Value (1-5)</Label>
+                    <Select
+                      value={formData.value?.toString()}
+                      onValueChange={(value) => setFormData({ ...formData, value: parseInt(value) })}
+                    >
+                      <SelectTrigger id="value">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num} - {num === 1 ? 'Very Low' : num === 2 ? 'Low' : num === 3 ? 'Medium' : num === 4 ? 'High' : 'Very High'}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="feature-date">Estimated Completion Date</Label>
-                  <Input
-                    id="feature-date"
-                    type="date"
-                    value={newFeature.estimatedDate}
-                    onChange={(e) => setNewFeature({ ...newFeature, estimatedDate: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="feature-notes">Notes</Label>
+                  <Label htmlFor="notes">Notes</Label>
                   <Textarea
-                    id="feature-notes"
-                    value={newFeature.notes}
-                    onChange={(e) => setNewFeature({ ...newFeature, notes: e.target.value })}
-                    placeholder="Additional notes or context..."
-                    rows={2}
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="Additional context or requirements..."
+                    rows={3}
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                <Button variant="outline" onClick={() => {
+                  setIsAddDialogOpen(false)
+                  resetForm()
+                }}>
                   Cancel
                 </Button>
-                <Button onClick={addFeature}>Add Feature</Button>
+                <Button onClick={editingFeature ? handleUpdateFeature : handleAddFeature}>
+                  {editingFeature ? 'Update Feature' : 'Add Feature'}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <FunnelSimple size={20} weight="bold" className="text-muted-foreground" />
-          <span className="text-sm font-medium">Filters:</span>
-        </div>
-        <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="in-progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
-        {(filterPriority !== 'all' || filterStatus !== 'all') && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setFilterPriority('all')
-              setFilterStatus('all')
-            }}
-          >
-            Clear Filters
-          </Button>
-        )}
-      </div>
-
       <div className="grid grid-cols-4 gap-4">
-        {categoryProgress.map(({ category, completed, total, percentage }) => {
-          const config = categoryConfig[category]
-          const Icon = config.icon
-          return (
-            <Card key={category} className="cursor-pointer hover:border-accent transition-colors" onClick={() => setSelectedCategory(category)}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className={`${config.color} p-2 rounded-md`}>
-                    <Icon size={16} weight="bold" className="text-white" />
-                  </div>
-                  <CardTitle className="text-sm font-semibold">{config.label}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{completed}/{total}</span>
-                    <span className="font-semibold">{percentage}%</span>
-                  </div>
-                  <Progress value={percentage} className="h-1.5" />
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Total Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">{stats.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-accent">{stats.inProgress}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-success">{stats.completed}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">{stats.avgProgress}%</div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-        <TabsList className="grid w-full grid-cols-9 h-auto">
-          <TabsTrigger value="all" className="text-xs">All Features</TabsTrigger>
-          {Object.entries(categoryConfig).map(([key, config]) => (
-            <TabsTrigger key={key} value={key} className="text-xs whitespace-nowrap">
-              {config.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <FunnelSimple size={20} weight="bold" className="text-muted-foreground" />
+            <span className="text-sm font-medium">Filters:</span>
+          </div>
+          <Select value={selectedRelease} onValueChange={setSelectedRelease}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Release" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Releases</SelectItem>
+              {releasesList.map((release) => (
+                <SelectItem key={release} value={release}>
+                  {release}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {Object.entries(categoryConfig).map(([key, config]) => (
+                <SelectItem key={key} value={key}>
+                  {config.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {Object.entries(statusConfig).map(([key, config]) => (
+                <SelectItem key={key} value={key}>
+                  {config.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {(selectedRelease !== 'all' || filterCategory !== 'all' || filterStatus !== 'all') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedRelease('all')
+                setFilterCategory('all')
+                setFilterStatus('all')
+              }}
+            >
+              Clear Filters
+            </Button>
+          )}
+        </div>
+        <Tabs value={viewMode} onValueChange={(v: any) => setViewMode(v)} className="w-auto">
+          <TabsList>
+            <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="list">List</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
-        <TabsContent value={selectedCategory} className="mt-6">
+      <Tabs value={viewMode} className="w-full">
+        <TabsContent value="kanban" className="mt-0">
+          <div className="grid grid-cols-5 gap-4">
+            {(Object.entries(statusGroups) as [StatusType, ProductFeature[]][]).map(([status, features]) => {
+              const config = statusConfig[status]
+              return (
+                <div key={status} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm uppercase tracking-wide">{config.label}</h3>
+                    <Badge variant="secondary" className="text-xs">{features.length}</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {features.map((feature) => (
+                      <FeatureCard
+                        key={feature.id}
+                        feature={feature}
+                        onEdit={handleEditFeature}
+                        onDelete={handleDeleteFeature}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="timeline" className="mt-0">
           <div className="space-y-6">
-            {categorizedFeatures.map(({ category, features: categoryFeatures }) => {
-              const config = categoryConfig[category]
-              const Icon = config.icon
+            {releasesList.map((release) => {
+              const releaseFeatures = releaseGroups[release] || []
+              if (releaseFeatures.length === 0) return null
               
               return (
-                <div key={category}>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`${config.color} p-2 rounded-md`}>
-                      <Icon size={20} weight="bold" className="text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold">{config.label}</h3>
-                    <Badge variant="secondary" className="ml-auto">
-                      {categoryFeatures.filter(f => f.completed).length} / {categoryFeatures.length}
-                    </Badge>
+                <div key={release} className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Flag size={20} weight="fill" className="text-accent" />
+                    <h3 className="text-xl font-bold">{release}</h3>
+                    <Badge variant="secondary">{releaseFeatures.length} features</Badge>
                   </div>
-                  
-                  <div className="space-y-2">
-                    {categoryFeatures.map((feature) => (
-                      <Card 
-                        key={feature.id} 
-                        className={`transition-all hover:shadow-md ${feature.completed ? 'bg-muted/30' : ''}`}
-                      >
+                  <div className="grid gap-3">
+                    {releaseFeatures.map((feature) => (
+                      <Card key={feature.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
-                          <div className="flex items-start gap-4">
-                            <Checkbox
-                              id={feature.id}
-                              checked={feature.completed}
-                              onCheckedChange={() => toggleFeature(feature.id)}
-                              className="mt-1"
-                            />
+                          <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <label
-                                    htmlFor={feature.id}
-                                    className={`text-sm font-semibold cursor-pointer ${
-                                      feature.completed ? 'line-through text-muted-foreground' : ''
-                                    }`}
-                                  >
-                                    {feature.name}
-                                  </label>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant={priorityColors[feature.priority]}>
-                                      {feature.priority}
-                                    </Badge>
-                                    {feature.estimatedDate && (
-                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                        <CalendarBlank size={14} />
-                                        <span>Est: {new Date(feature.estimatedDate).toLocaleDateString()}</span>
-                                      </div>
-                                    )}
-                                    {feature.completedDate && (
-                                      <div className="flex items-center gap-1 text-xs text-green-600">
-                                        <CheckCircle size={14} weight="fill" />
-                                        <span>Done: {new Date(feature.completedDate).toLocaleDateString()}</span>
-                                      </div>
-                                    )}
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-semibold">{feature.title}</h4>
+                                <Badge variant={priorityConfig[feature.priority].color as any}>
+                                  {priorityConfig[feature.priority].label}
+                                </Badge>
+                                <Badge variant={statusConfig[feature.status].color as any}>
+                                  {statusConfig[feature.status].label}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3">{feature.description}</p>
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Users size={14} />
+                                  <span>{feature.owner}</span>
+                                </div>
+                                {feature.startDate && (
+                                  <div className="flex items-center gap-1">
+                                    <CalendarBlank size={14} />
+                                    <span>{new Date(feature.startDate).toLocaleDateString()} - {feature.endDate ? new Date(feature.endDate).toLocaleDateString() : 'TBD'}</span>
                                   </div>
+                                )}
+                                <div className="flex items-center gap-1">
+                                  <Target size={14} />
+                                  <span>Effort: {feature.effort}/5</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <ChartLine size={14} />
+                                  <span>Value: {feature.value}/5</span>
                                 </div>
                               </div>
-                              <p className={`text-sm mt-2 ${
-                                feature.completed ? 'text-muted-foreground line-through' : 'text-muted-foreground'
-                              }`}>
-                                {feature.description}
-                              </p>
-                              {feature.notes && (
-                                <div className="mt-2 p-2 bg-muted/50 rounded-md flex items-start gap-2">
-                                  <ChatCircleText size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
-                                  <p className="text-xs text-muted-foreground">{feature.notes}</p>
+                              <div className="mt-3">
+                                <div className="flex items-center justify-between text-xs mb-1">
+                                  <span className="text-muted-foreground">Progress</span>
+                                  <span className="font-semibold">{feature.progress}%</span>
                                 </div>
-                              )}
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="mt-2 h-7 text-xs"
-                                    onClick={() => setEditingFeature(feature)}
-                                  >
-                                    <ChatCircleText size={14} className="mr-1" />
-                                    {feature.notes ? 'Edit Notes' : 'Add Notes'}
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Feature Notes</DialogTitle>
-                                    <DialogDescription>{feature.name}</DialogDescription>
-                                  </DialogHeader>
-                                  <div className="grid gap-4 py-4">
-                                    <Textarea
-                                      value={editingFeature?.id === feature.id ? editingFeature.notes || '' : feature.notes || ''}
-                                      onChange={(e) => {
-                                        if (editingFeature?.id === feature.id) {
-                                          setEditingFeature({ ...editingFeature, notes: e.target.value })
-                                        }
-                                      }}
-                                      placeholder="Add notes, context, or updates about this feature..."
-                                      rows={6}
-                                    />
-                                  </div>
-                                  <DialogFooter>
-                                    <Button
-                                      onClick={() => {
-                                        if (editingFeature) {
-                                          updateFeatureNotes(feature.id, editingFeature.notes || '')
-                                          setEditingFeature(null)
-                                          toast.success('Notes updated')
-                                        }
-                                      }}
-                                    >
-                                      Save Notes
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
+                                <Progress value={feature.progress} className="h-2" />
+                              </div>
                             </div>
-                            {feature.completed ? (
-                              <CheckCircle size={20} weight="fill" className="text-green-500 mt-1 flex-shrink-0" />
-                            ) : (
-                              <Circle size={20} className="text-muted-foreground mt-1 flex-shrink-0" />
-                            )}
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditFeature(feature)}
+                              >
+                                <Pencil size={16} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteFeature(feature.id)}
+                              >
+                                <Trash size={16} />
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -821,7 +715,131 @@ export default function ProductRoadmap() {
             })}
           </div>
         </TabsContent>
+
+        <TabsContent value="list" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Features</CardTitle>
+              <CardDescription>Complete list of product roadmap features</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {filteredFeatures.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Rocket size={48} weight="thin" className="mx-auto mb-4 opacity-50" />
+                    <p>No features found. Add your first feature to get started!</p>
+                  </div>
+                ) : (
+                  filteredFeatures.map((feature) => (
+                    <div key={feature.id} className="flex items-center gap-4 p-3 rounded-md hover:bg-muted/50 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-sm">{feature.title}</h4>
+                          <Badge variant={statusConfig[feature.status].color as any} className="text-xs">
+                            {statusConfig[feature.status].label}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{feature.description}</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground flex-shrink-0">
+                        <Badge variant="outline">{feature.release}</Badge>
+                        <Badge variant={priorityConfig[feature.priority].color as any}>
+                          {priorityConfig[feature.priority].label}
+                        </Badge>
+                        <div className="w-24">
+                          <Progress value={feature.progress} className="h-1.5" />
+                        </div>
+                        <span className="font-mono font-semibold w-12 text-right">{feature.progress}%</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditFeature(feature)}
+                        >
+                          <Pencil size={14} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteFeature(feature.id)}
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+function FeatureCard({ 
+  feature, 
+  onEdit, 
+  onDelete 
+}: { 
+  feature: ProductFeature
+  onEdit: (feature: ProductFeature) => void
+  onDelete: (id: string) => void
+}) {
+  const categoryConfig2 = categoryConfig[feature.category]
+  const Icon = categoryConfig2.icon
+
+  return (
+    <Card className="hover:shadow-md transition-all group">
+      <CardContent className="p-3">
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className={`${categoryConfig2.color} p-1.5 rounded-md flex-shrink-0`}>
+              <Icon size={14} weight="bold" className="text-white" />
+            </div>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => onEdit(feature)}
+              >
+                <Pencil size={12} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => onDelete(feature.id)}
+              >
+                <Trash size={12} />
+              </Button>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold text-sm mb-1 line-clamp-2">{feature.title}</h4>
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{feature.description}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <Badge variant={priorityConfig[feature.priority].color as any} className="text-xs">
+              {priorityConfig[feature.priority].label}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Users size={12} />
+            <span className="line-clamp-1">{feature.owner}</span>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-semibold">{feature.progress}%</span>
+            </div>
+            <Progress value={feature.progress} className="h-1.5" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
