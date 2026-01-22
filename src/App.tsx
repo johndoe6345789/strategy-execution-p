@@ -1,18 +1,18 @@
 import { useKV } from '@github/spark/hooks'
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { 
-  Strategy, 
-  ChartBar, 
-  FolderOpen, 
-  Target, 
-  MapTrifold, 
-  Rocket, 
-  ChartLine, 
-  TrendUp, 
-  ArrowsLeftRight, 
-  Tree, 
-  GridFour, 
+import {
+  Strategy,
+  ChartBar,
+  FolderOpen,
+  Target,
+  MapTrifold,
+  Rocket,
+  ChartLine,
+  TrendUp,
+  ArrowsLeftRight,
+  Tree,
+  GridFour,
   Circle,
   House,
   CaretDown,
@@ -21,7 +21,10 @@ import {
   ChartLineUp,
   GitBranch,
   ArrowsDownUp,
-  Gavel
+  Gavel,
+  Users,
+  Presentation,
+  FileText
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import StrategyCards from './components/StrategyCards'
@@ -42,6 +45,9 @@ import FinancialTracking from './components/FinancialTracking'
 import ExecutiveDashboard from './components/ExecutiveDashboard'
 import StrategyToInitiative from './components/StrategyToInitiative'
 import PortfolioGovernance from './components/PortfolioGovernance'
+import CollaborativeWorkshops from './components/CollaborativeWorkshops'
+import CustomScorecard from './components/CustomScorecard'
+import AutomatedReportGeneration from './components/AutomatedReportGeneration'
 import type { StrategyCard, Initiative } from './types'
 
 type NavigationItem = {
@@ -66,6 +72,7 @@ const navigationSections: NavigationSection[] = [
       { id: 'comparison', label: 'Compare', icon: ArrowsLeftRight, component: StrategyComparison },
       { id: 'traceability', label: 'Traceability', icon: Tree, component: StrategyTraceability },
       { id: 'strategy-to-initiative', label: 'Strategy to Initiative', icon: ArrowsDownUp, component: StrategyToInitiative },
+      { id: 'workshops', label: 'Collaborative Workshops', icon: Users, component: CollaborativeWorkshops },
     ]
   },
   {
@@ -103,7 +110,9 @@ const navigationSections: NavigationSection[] = [
       { id: 'executive-dashboard', label: 'Executive Dashboard', icon: ChartLineUp, component: ExecutiveDashboard },
       { id: 'dashboard', label: 'Performance Dashboard', icon: Target, component: Dashboard },
       { id: 'kpi', label: 'KPI Scorecard', icon: ChartLine, component: KPIDashboard },
+      { id: 'custom-scorecard', label: 'Custom Scorecards', icon: Presentation, component: CustomScorecard },
       { id: 'financial', label: 'Financial Tracking', icon: CurrencyDollar, component: FinancialTracking },
+      { id: 'automated-reports', label: 'Automated Reports', icon: FileText, component: AutomatedReportGeneration },
     ]
   }
 ]
@@ -298,6 +307,7 @@ function getModuleDescription(moduleId: string): string {
     'comparison': 'Compare multiple strategic options side-by-side',
     'traceability': 'Map relationships from goals to initiatives',
     'strategy-to-initiative': 'AI-powered translation of strategy into executable initiatives',
+    'workshops': 'Real-time collaboration and discussion on strategic initiatives',
     'workbench': 'Execute and track strategic initiatives',
     'tracker': 'Monitor initiative progress with real-time status',
     'okr': 'Define and track Objectives and Key Results',
@@ -311,7 +321,9 @@ function getModuleDescription(moduleId: string): string {
     'executive-dashboard': 'Executive-level strategic performance overview',
     'dashboard': 'Real-time performance metrics and insights',
     'kpi': 'Monitor key performance indicators and metrics',
+    'custom-scorecard': 'Create and manage configurable performance scorecards',
     'financial': 'Track financial outcomes and value realization',
+    'automated-reports': 'Generate comprehensive reports from your strategic data',
   }
   return descriptions[moduleId] || 'Manage your strategic initiatives'
 }

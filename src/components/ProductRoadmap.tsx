@@ -53,7 +53,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Real-time collaboration features for strategy workshops',
     category: 'strategy-cards',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive collaborative workshop system with real-time commenting, discussion threads, workshop scheduling and management, participant tracking, and support for different comment types (comments, questions, suggestions, concerns). Features include likes, replies, workshop status tracking, and seamless integration with strategy cards for focused strategic discussions.'
   },
   {
     id: 'sc-4',
@@ -325,7 +327,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Configurable scorecards with standard definitions',
     category: 'reporting',
     priority: 'medium',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Built comprehensive custom scorecard builder allowing users to create multiple scorecards with configurable metrics. Features include metric categorization (Financial, Customer, Internal Process, Learning & Growth, Strategic, Operational, Quality, Safety), weighted scoring system, visibility controls, current vs target tracking with progress visualization, category-based organization, overall scorecard scoring, and real-time metric management with editing capabilities.'
   },
   {
     id: 'rp-5',
@@ -333,7 +337,9 @@ const initialFeatures: RoadmapFeature[] = [
     description: 'Replace manual spreadsheet reporting',
     category: 'reporting',
     priority: 'high',
-    completed: false
+    completed: true,
+    completedDate: new Date().toISOString().split('T')[0],
+    notes: 'Implemented comprehensive automated report generation system with multiple pre-configured templates (Executive Summary, Strategic Performance, Operational Dashboard, Financial Performance). Features include configurable sections (executive summary, strategy overview, initiative status, financial summary, KPI dashboard, portfolio breakdown), multiple export formats (HTML, CSV), professional styled HTML reports with tables and charts, automatic data aggregation from all strategic sources, and one-click report generation with download functionality.'
   },
   {
     id: 'nf-1',
